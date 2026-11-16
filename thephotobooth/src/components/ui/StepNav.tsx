@@ -24,6 +24,7 @@ const STEP_LABELS: Record<AppStep, string> = {
   [AppStep.Filter]: "Filter",
   [AppStep.Capture]: "Capture",
   [AppStep.Result]: "Result",
+  [AppStep.Stickers]: "Stickers",
 };
 
 export function StepNav({

@@ -12,14 +12,14 @@ export async function uploadSharedPhoto(
   signal: AbortSignal,
 ): Promise<string> {
   if (!/^[a-zA-Z0-9_-]+$/.test(config.cloudName))
-    throw new Error("Revisa el cloud name de Cloudinary.");
+    throw new Error("Check your Cloudinary cloud name.");
   if (!imageUrl.startsWith("data:image/png;base64,"))
-    throw new Error("La tira no está lista para compartir.");
+    throw new Error("The strip is not ready to share.");
   const photo = await fetch(imageUrl, { signal }).then((response) =>
     response.blob(),
   );
   if (photo.size > 5 * 1024 * 1024)
-    throw new Error("La foto supera el límite de 5 MB.");
+    throw new Error("The photo exceeds the 5 MB limit.");
   const body = new FormData();
   body.append("file", photo, "the-photobooth.png");
   body.append("upload_preset", config.uploadPreset);
@@ -35,22 +35,22 @@ export async function uploadSharedPhoto(
   if (!response.ok) {
     if (response.status === 400 || response.status === 401)
       throw new Error(
-        "Revisa el cloud name y que el upload preset sea Unsigned.",
+        "Check your cloud name and make sure the upload preset is Unsigned.",
       );
-    throw new Error("No se pudo subir la foto. Intenta de nuevo.");
+    throw new Error("Could not upload the photo. Please try again.");
   }
   let sharedUrl: URL;
   try {
     sharedUrl = new URL(result?.secure_url);
   } catch {
-    throw new Error("El alojamiento no devolvió un enlace válido.");
+    throw new Error("The hosting service did not return a valid link.");
   }
   if (
     sharedUrl.protocol !== "https:" ||
     sharedUrl.hostname !== "res.cloudinary.com" ||
     !sharedUrl.pathname.startsWith(`/${config.cloudName}/image/upload/`)
   ) {
-    throw new Error("El alojamiento no devolvió un enlace válido.");
+    throw new Error("The hosting service did not return a valid link.");
   }
   return sharedUrl.href;
 }

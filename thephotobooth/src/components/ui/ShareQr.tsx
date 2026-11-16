@@ -1,9 +1,11 @@
+import { useTranslation } from "../../i18n/useLanguage";
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 
 import { getSharingConfig, uploadSharedPhoto } from "../../utils/sharePhoto";
 
 export function ShareQr({ imageUrl }: { imageUrl: string | null }) {
+  const t = useTranslation();
   const [share, setShare] = useState<string | null>(null);
   const [qr, setQr] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -24,8 +26,7 @@ export function ShareQr({ imageUrl }: { imageUrl: string | null }) {
     const controller = new AbortController();
     requestRef.current = controller;
     try {
-      if (!config)
-        throw new Error("Falta conectar el alojamiento de las fotos.");
+      if (!config) throw new Error("Photo hosting has not been connected yet.");
       const result = await uploadSharedPhoto(
         imageUrl,
         config,
@@ -44,7 +45,9 @@ export function ShareQr({ imageUrl }: { imageUrl: string | null }) {
     } catch (cause) {
       if (!controller.signal.aborted)
         setError(
-          cause instanceof Error ? cause.message : "No se pudo generar el QR.",
+          cause instanceof Error
+            ? cause.message
+            : "Could not generate the QR code.",
         );
     } finally {
       if (!controller.signal.aborted) setLoading(false);
@@ -60,39 +63,43 @@ export function ShareQr({ imageUrl }: { imageUrl: string | null }) {
         aria-expanded={open}
         onClick={() => void createQr()}
       >
-        {loading ? "creating QR…" : open ? "HIDE QR" : "GET QR"}
+        {loading ? t("creating QR…") : open ? t("HIDE QR") : t("GET QR")}
       </button>
       {!config && (
-        <p className="share-note">QR pendiente de conectar el alojamiento.</p>
+        <p className="share-note">
+          {t("Connect photo hosting to enable QR sharing.")}
+        </p>
       )}
       {config && !share && (
         <p className="share-note">
-          Al generar el QR, esta tira se sube a Cloudinary. Cualquiera con el
-          enlace puede verla.
+          {t(
+            "Generating a QR code uploads this strip to Cloudinary. Anyone with the link can view it.",
+          )}
         </p>
       )}
       {error && (
         <p className="share-error" role="alert">
-          {error}
+          {t(error)}
         </p>
       )}
       {open && qr && share && (
         <div className="qr-card">
-          <p>scan & save</p>
+          <p>{t("scan & save")}</p>
           <img
             src={qr}
             width="256"
             height="256"
-            alt="QR para descargar esta tira de fotos"
+            alt={t("QR code to download this photo strip")}
           />
           <a href={share} target="_blank" rel="noreferrer">
-            abrir foto ↗
+            {t("open photo ↗")}
           </a>
           <small>
-            Escanea con la cámara de tu teléfono. Mantén presionada la foto para
-            guardarla.
+            {t(
+              "Scan with your phone camera. Touch and hold the photo to save it.",
+            )}
           </small>
-          <small>Cualquiera con el enlace puede verla.</small>
+          <small>{t("Anyone with the link can view it.")}</small>
         </div>
       )}
     </div>

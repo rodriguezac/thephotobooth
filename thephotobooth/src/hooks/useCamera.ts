@@ -11,8 +11,8 @@ export function useCamera() {
   const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const filter = usePhotoboothStore(selectFilter);
-  const cssFilter =
-    FILTER_OPTIONS.find((f) => f.value === filter)?.cssFilter ?? "none";
+  const activeOption = FILTER_OPTIONS.find((f) => f.value === filter);
+  const cssFilter = activeOption?.cssFilter ?? "none";
 
   const stopCamera = useCallback(() => {
     requestRef.current++;
@@ -31,7 +31,7 @@ export function useCamera() {
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
         throw new Error(
-          "Abre la app en localhost o HTTPS para usar la cámara.",
+          "Open the app on localhost or HTTPS to use the camera.",
         );
       }
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -63,7 +63,7 @@ export function useCamera() {
         track.onended = () => {
           if (request !== requestRef.current) return;
           stopCamera();
-          setError("La cámara se desconectó. Conéctala y vuelve a intentar.");
+          setError("The camera was disconnected. Reconnect it and try again.");
         };
       });
     } catch (err) {
@@ -73,14 +73,14 @@ export function useCamera() {
         err && typeof err === "object" && "name" in err ? String(err.name) : "";
       setError(
         name === "NotAllowedError"
-          ? "Permiso denegado. Permite la cámara en los ajustes de este sitio y revisa Privacidad > Cámara en tu Mac."
+          ? "Camera permission denied. Allow camera access in your browser and device privacy settings."
           : name === "NotFoundError"
-            ? "No encontramos una cámara. Conecta una y vuelve a intentar."
+            ? "No camera found. Connect one and try again."
             : name === "NotReadableError"
-              ? "La cámara está ocupada o no está disponible. Cierra otras apps que la usen e intenta de nuevo."
+              ? "The camera is busy or unavailable. Close other apps using it and try again."
               : err instanceof Error && name === "Error"
                 ? err.message
-                : "No se pudo iniciar la cámara. Vuelve a intentar.",
+                : "Could not start the camera. Please try again.",
       );
     }
   }, [stopCamera]);
@@ -146,6 +146,7 @@ export function useCamera() {
     isStarting,
     error,
     cssFilter,
+    overlay: activeOption?.overlay,
     startCamera,
     stopCamera,
     capture,

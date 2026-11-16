@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useEffect } from "react";
+import { useLanguage } from "./i18n/useLanguage";
 import {
   usePhotoboothStore,
   selectCurrentStep,
@@ -14,9 +15,15 @@ import { PhotoCountScreen } from "./components/steps/PhotoCount/PhotoCountScreen
 import { StripStyleScreen } from "./components/steps/StripStyle/StripStyleScreen";
 import { FilterScreen } from "./components/steps/Filter/FilterScreen";
 import { CaptureScreen } from "./components/steps/Capture/CaptureScreen";
+import { StickerScreen } from "./components/steps/Stickers/StickerScreen";
 import { ResultScreen } from "./components/steps/Result/ResultScreen";
 
 function App() {
+  const language = useLanguage((state) => state.language);
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.title = "The Photobooth";
+  }, [language]);
   const currentStep = usePhotoboothStore(selectCurrentStep);
 
   useEffect(() => {
@@ -30,6 +37,7 @@ function App() {
     [AppStep.Filter]: <FilterScreen />,
     [AppStep.Capture]: <CaptureScreen />,
     [AppStep.Result]: <ResultScreen />,
+    [AppStep.Stickers]: <StickerScreen />,
   };
 
   return <main className="app">{screens[currentStep]}</main>;

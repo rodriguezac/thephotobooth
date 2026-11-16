@@ -16,7 +16,7 @@ describe("QR sharing controls", () => {
     vi.mocked(getSharingConfig).mockReturnValue(null);
     render(<ShareQr imageUrl={image} />);
     expect((screen.getByRole("button", { name: "GET QR" }) as HTMLButtonElement).disabled).toBe(true);
-    expect(screen.getByText("QR pendiente de conectar el alojamiento.")).toBeTruthy();
+    expect(screen.getByText("Connect photo hosting to enable QR sharing.")).toBeTruthy();
     expect(uploadSharedPhoto).not.toHaveBeenCalled();
   });
   it("only uploads on click and encodes the public photo URL; toggling reuses it", async () => {
@@ -35,10 +35,10 @@ describe("QR sharing controls", () => {
   });
   it("shows an upload error without creating a QR and allows retry", async () => {
     vi.mocked(getSharingConfig).mockReturnValue({ cloudName: "test", uploadPreset: "photos" });
-    vi.mocked(uploadSharedPhoto).mockRejectedValueOnce(new Error("Sin conexión")).mockResolvedValueOnce(publicUrl);
+    vi.mocked(uploadSharedPhoto).mockRejectedValueOnce(new Error("No connection")).mockResolvedValueOnce(publicUrl);
     render(<ShareQr imageUrl={image} />);
     fireEvent.click(screen.getByRole("button", { name: "GET QR" }));
-    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe("Sin conexión"));
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe("No connection"));
     expect(QRCode.toDataURL).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "GET QR" }));
     await waitFor(() => expect(screen.getByRole("link").getAttribute("href")).toBe(publicUrl));

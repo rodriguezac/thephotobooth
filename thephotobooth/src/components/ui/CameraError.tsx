@@ -1,3 +1,4 @@
+import { useTranslation } from "../../i18n/useLanguage";
 export function CameraError({
   error,
   retry,
@@ -5,12 +6,13 @@ export function CameraError({
   error: string | null;
   retry: () => void;
 }) {
+  const t = useTranslation();
   if (!error) return null;
   return (
     <div className="camera-error" role="alert">
-      <p>{error}</p>
+      <p>{t(error)}</p>
       <button className="pill outline" onClick={retry}>
-        retry camera
+        {t("retry camera")}
       </button>
     </div>
   );

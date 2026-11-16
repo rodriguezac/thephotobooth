@@ -1,3 +1,4 @@
+import { useTranslation } from "../../i18n/useLanguage";
 interface Props {
   onNext?: () => void;
   onBack?: () => void;
@@ -12,16 +13,17 @@ export function NavArrows({
   showBack = true,
   showNext = true,
 }: Props) {
+  const t = useTranslation();
   return (
-    <nav className="step-navigation" aria-label="Step navigation">
+    <nav className="step-navigation" aria-label={t("Step navigation")}>
       {showBack && onBack && (
         <button className="text-button" onClick={onBack}>
-          ← back
+          {t("← back")}
         </button>
       )}
       {showNext && onNext && (
         <button className="pill" onClick={onNext} disabled={!canProceed}>
-          next →
+          {t("next →")}
         </button>
       )}
     </nav>

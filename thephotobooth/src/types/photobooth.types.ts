@@ -13,6 +13,7 @@ export enum AppStep {
   Filter = 3,
   Capture = 4,
   Result = 5,
+  Stickers = 6,
 }
 
 // ------------------------------------------------------------
@@ -34,7 +35,7 @@ export interface PhotoCountOption {
 // ------------------------------------------------------------
 export interface PatternStyle {
   type: "pattern";
-  /** ID del patrón (1–10) */
+  /** ID del archivo de patrón */
   id: number;
   /** Ruta pública a la imagen, p.ej. "/patrones/1.png" */
   src: string;
@@ -70,6 +71,11 @@ export enum PhotoFilter {
   BW = "bw",
   Vintage = "vintage",
   Cool = "cool",
+  Year2016 = "2016",
+  SepiaFilm = "sepia-film",
+  RosePop = "rose-pop",
+  PinkInk = "pink-ink",
+  BlueMoon = "blue-moon",
 }
 
 export interface PhotoFilterOption {
@@ -78,6 +84,7 @@ export interface PhotoFilterOption {
   description: string;
   /** CSS filter string que se aplicará al elemento <video> / <canvas> */
   cssFilter: string;
+  overlay?: { src: string; opacity: number; blendMode: "soft-light" };
 }
 
 // ------------------------------------------------------------
@@ -93,7 +100,29 @@ export interface CapturedPhoto {
 // ------------------------------------------------------------
 // Estado global del store
 // ------------------------------------------------------------
+export interface StickerAsset {
+  id: string;
+  src: string;
+  label: string;
+}
+
+export interface PlacedSticker {
+  id: string;
+  assetId: string;
+  src: string;
+  label: string;
+  /** Center position and width relative to the full strip. */
+  x: number;
+  y: number;
+  width: number;
+  aspectRatio: number;
+  rotation?: number;
+  flipX?: boolean;
+  flipY?: boolean;
+}
+
 export interface PhotoboothState {
+  stickers: PlacedSticker[];
   /** Paso actual en el flujo */
   currentStep: AppStep;
 
@@ -123,6 +152,14 @@ export interface PhotoboothState {
 // Acciones del store
 // ------------------------------------------------------------
 export interface PhotoboothActions {
+  addSticker: (sticker: PlacedSticker) => void;
+  updateSticker: (
+    id: string,
+    changes: Partial<
+      Pick<PlacedSticker, "x" | "y" | "width" | "rotation" | "flipX" | "flipY">
+    >,
+  ) => void;
+  removeSticker: (id: string) => void;
   /** Avanza al siguiente paso */
   nextStep: () => void;
 
@@ -152,6 +189,9 @@ export interface PhotoboothActions {
 
   /** Activa/desactiva el estado de la cámara */
   setCameraActive: (active: boolean) => void;
+
+  /** Retake photos while keeping the current style, filter and stickers. */
+  repeatSession: () => void;
 
   /** Reinicia toda la sesión */
   resetSession: () => void;

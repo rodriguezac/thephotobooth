@@ -88,7 +88,7 @@ describe("camera lifecycle", () => {
       new DOMException("denied", "NotAllowedError"),
     );
     render(<Camera />);
-    await waitFor(() => expect(camera.error).toContain("Permiso denegado"));
+    await waitFor(() => expect(camera.error).toContain("Camera permission denied"));
     expect(camera.isStreaming).toBe(false);
     const stream = mockStream();
     getUserMedia.mockResolvedValueOnce(stream);

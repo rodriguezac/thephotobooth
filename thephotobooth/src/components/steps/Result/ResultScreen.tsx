@@ -1,12 +1,21 @@
-import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "../../../i18n/useLanguage";
+import { getStripLayout } from "../../../utils/stripLayout";
+import { useEffect, useRef } from "react";
 import { usePhotoboothStore } from "../../../store/usePhotoboothStore";
 import { AppStep } from "../../../types/photobooth.types";
-import { generateStrip } from "../../../utils/canvasUtils";
-import { ShareQr } from "../../ui/ShareQr";
+import { useStripPreview } from "../../../hooks/useStripPreview";
 import { Watermark } from "../../ui/Watermark";
 export function ResultScreen() {
-  const { capturedPhotos, stripBg, filter, goToStep, resetSession } =
-    usePhotoboothStore();
+  const t = useTranslation();
+  const {
+    capturedPhotos,
+    stripBg,
+    filter,
+    stickers,
+    goToStep,
+    repeatSession,
+    resetSession,
+  } = usePhotoboothStore();
   const zoomRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const previewRef = useRef<HTMLButtonElement>(null);
@@ -61,32 +70,17 @@ export function ResultScreen() {
     );
   };
   useEffect(() => () => zoomAnimation.current?.cancel(), []);
-  const [url, setUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [attempt, setAttempt] = useState(0);
-  useEffect(() => {
-    let cancelled = false;
-    setUrl(null);
-    setError(null);
-    if (!stripBg || !capturedPhotos.length) {
-      setError("No hay fotos para crear la tira. Vuelve a empezar.");
-      return;
-    }
-    generateStrip(capturedPhotos, stripBg, filter)
-      .then((result) => {
-        if (!cancelled) setUrl(result);
-      })
-      .catch(() => {
-        if (!cancelled) setError("No se pudo crear la tira. Intenta de nuevo.");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [capturedPhotos, stripBg, filter, attempt]);
+  const { url, error, retry } = useStripPreview(
+    capturedPhotos,
+    stripBg,
+    filter,
+    stickers,
+  );
+  const layout = getStripLayout(capturedPhotos.length || 1);
   return (
     <section className="screen result-screen">
       <header className="screen-heading">
-        <h1>5. taDa</h1>
+        <h1>{t("5. taDa")}</h1>
       </header>
       <div className="result-layout">
         <div
@@ -95,25 +89,30 @@ export function ResultScreen() {
           <img
             className="printer-slot"
             src="/extras/ranura.webp"
-            alt="Photo printer"
+            alt={t("Photo printer")}
           />
-          <div className="print-window">
+          <div
+            className="print-window"
+            style={{ aspectRatio: `${layout.width} / ${layout.height}` }}
+          >
             {url ? (
               <button
                 ref={triggerRef}
                 className="strip-zoom-trigger"
-                aria-label="Enlarge photo strip"
+                aria-label={t("Enlarge photo strip")}
                 onClick={openZoom}
               >
                 <img
                   className="finished-strip"
                   src={url}
-                  alt={`Your finished strip with ${capturedPhotos.length} photos`}
+                  alt={t("Your finished strip with {count} photos", {
+                    count: capturedPhotos.length,
+                  })}
                 />
               </button>
             ) : (
               <p className="printing" role="status">
-                {error ? "oops :(" : "printing…"}
+                {error ? t("oops :(") : t("printing…")}
               </p>
             )}
           </div>
@@ -129,31 +128,34 @@ export function ResultScreen() {
               if (!url) e.preventDefault();
             }}
           >
-            DOWNLOAD
+            {t("DOWNLOAD")}
           </a>
           <button
             className="pill outline"
             id="btn-repeat"
-            onClick={resetSession}
+            onClick={repeatSession}
           >
-            REPEAT
+            {t("REPEAT")}
           </button>
           <button
             className="pill outline"
             id="btn-customize"
             onClick={() => goToStep(AppStep.StripStyle)}
           >
-            CUSTOMIZE
+            {t("CUSTOMIZE")}
           </button>
-          <ShareQr key={url ?? "pending"} imageUrl={url} />
+          <button
+            className="pill outline"
+            id="btn-main-menu"
+            onClick={resetSession}
+          >
+            {t("MAIN MENU")}
+          </button>
           {error && (
             <div className="camera-error" role="alert">
-              <p>{error}</p>
-              <button
-                className="text-button"
-                onClick={() => setAttempt((a) => a + 1)}
-              >
-                retry
+              <p>{t(error)}</p>
+              <button className="text-button" onClick={retry}>
+                {t("retry")}
               </button>
             </div>
           )}
@@ -162,7 +164,7 @@ export function ResultScreen() {
       <dialog
         ref={zoomRef}
         className={`strip-zoom ${capturedPhotos.length === 4 ? "strip-zoom-wide" : ""}`}
-        aria-label="Enlarged photo strip"
+        aria-label={t("Enlarged photo strip")}
         onCancel={(event) => {
           event.preventDefault();
           closeZoom();
@@ -175,10 +177,10 @@ export function ResultScreen() {
           <button
             ref={previewRef}
             className="strip-zoom-close"
-            aria-label="Close enlarged photo strip"
+            aria-label={t("Close enlarged photo strip")}
             onClick={closeZoom}
           >
-            <img src={url} alt="Enlarged photo strip" />
+            <img src={url} alt={t("Enlarged photo strip")} />
           </button>
         )}
       </dialog>

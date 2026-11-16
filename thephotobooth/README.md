@@ -25,21 +25,24 @@ La vista previa usa el video por encima de la pantalla opaca de la imagen de cá
 
 ## Fotos y exportación
 
-Las fotos se procesan en el navegador y no se envían automáticamente a un servidor. Compartir por QR sí sube la tira final, como se explica abajo. Se conservan originales en memoria para poder personalizar fondo y filtro después de capturar. `CUSTOMIZE` permite volver al estilo y guardar directamente o seguir al filtro; `REPEAT` reinicia la sesión. Al cambiar la cantidad se eliminan las capturas anteriores. Recargar la página también reinicia la sesión.
+Las fotos se procesan en el navegador y no se envían automáticamente a un servidor. El QR está oculto y deshabilitado en la primera versión; no se suben fotos a Cloudinary. Se conservan originales en memoria para poder personalizar fondo y filtro después de capturar. `CUSTOMIZE` permite volver al estilo y guardar directamente o seguir al filtro; `REPEAT` vuelve a tomar las fotos con la misma cantidad, fondo, filtro y stickers. `MAIN MENU` reinicia la sesión desde la pantalla START. Al cambiar la cantidad se eliminan las capturas anteriores. Recargar la página también reinicia la sesión.
 
 La previsualización final y la descarga usan el mismo PNG generado con Canvas 2D, evitando diferencias de encuadre, filtro o distribución. Los tests cubren el ciclo de vida de cámara, permisos tardíos, reintentos, captura sin dimensiones y exportación de 1-4 fotos.
 
-## Compartir con QR desde cualquier lugar
+## QR (fuera de la primera versión)
 
-El botón `GET QR` sube únicamente la tira final a Cloudinary al pulsarlo y genera un QR localmente con su URL HTTPS pública. No contiene localhost ni la imagen codificada dentro del QR. El QR usa el rosa de la marca `#ff0da2` sobre blanco. El destinatario puede abrir la foto desde otra red y mantenerla presionada para guardarla. Cambiar la tira reinicia el QR para evitar compartir la versión anterior.
+El componente `ShareQr` y sus pruebas se conservan para una versión futura, pero no se montan en la pantalla de resultado. El build de producción no incluye el código de carga a Cloudinary. No configures variables de Cloudinary para esta versión.
 
-Para activar la función:
+## Deploy en Netlify
 
-1. En tu cuenta de Cloudinary, copia el **Cloud name**.
-2. En **Settings → Upload → Upload presets**, crea un preset con **Signing mode: Unsigned**. Restringe los formatos a `png`, el tamaño a 5 MB y usa una carpeta dedicada como `photobooth`. Conserva los identificadores únicos y no habilites sobrescritura.
-3. Copia `.env.example` a `.env.local` y completa `VITE_CLOUDINARY_CLOUD_NAME` y `VITE_CLOUDINARY_UPLOAD_PRESET`. Son identificadores públicos de esta modalidad; no se requiere API secret.
-4. Reinicia Vite. En producción configura las mismas variables antes de compilar.
+El repositorio contiene `netlify.toml` en la raíz: usa `thephotobooth` como carpeta base, Node 22, `npm run build` y publica `dist`. No subas `.env.local`, `work` ni `node_modules`.
 
-Mientras falte la configuración, `GET QR` se muestra deshabilitado con una explicación; la descarga local sigue funcionando. Las fotos solo se suben al pulsar ese botón. Son accesibles para cualquiera que reciba el enlace y permanecen en la cuenta hasta que se eliminen desde Cloudinary. El QR dejará de funcionar al eliminar la imagen. El navegador avisa si la subida falla y permite reintentar.
+Producción: https://thephotobboth-raspaorojo.netlify.app/
 
-Documentación: https://cloudinary.com/documentation/upload_images#unauthenticated_requests y https://cloudinary.com/documentation/upload_presets
+Al conectar el proyecto de Netlify a `rodriguezac/thephotobooth` con `main` como rama de producción, cada push a `main` inicia un build y publica el resultado si termina correctamente. Los cambios locales necesitan commit y push para publicarse.
+
+## Stickers in Customize
+
+After choosing a style and filter, `Next` opens the sticker editor with the PNG files from `public/stickers/`. Drag a sticker from the gallery onto the strip, or tap to add it. Use one finger to move the selected sticker and two fingers to pinch, rotate and move it together. When one finger is lifted, dragging continues without a position jump. Tap `Done` to deselect the sticker and scroll the strip normally.
+
+Manual tools include size and rotation sliders, 15-degree rotation buttons, horizontal and vertical flips, orientation reset, and removal. Arrow keys move a focused sticker (Shift moves faster); Delete removes it. Position, size, rotation and flips are preserved in the downloaded PNG and when navigating back through Customize. `Repeat` retakes the photos with the same count, background, filter and sticker composition. `Main Menu` returns to the welcome screen and resets the session; selecting a new photo count also starts a new composition. The paginated catalog is defined in `src/utils/stickers.ts`.

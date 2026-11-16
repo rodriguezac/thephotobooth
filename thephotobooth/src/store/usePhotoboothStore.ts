@@ -24,6 +24,7 @@ const initialState: PhotoboothState = {
   activeStyleTab: "patterns",
   filter: PhotoFilter.Normal,
   capturedPhotos: [],
+  stickers: [],
   stripDataUrl: null,
   isCameraActive: false,
 };
@@ -40,13 +41,26 @@ export const usePhotoboothStore = create<PhotoboothStore>()(
       // ---- Navegación entre pasos -------------------------
       nextStep: () => {
         const { currentStep } = get();
-        const next = Math.min(currentStep + 1, AppStep.Result) as AppStep;
+        const next =
+          currentStep === AppStep.Stickers
+            ? AppStep.Result
+            : (Math.min(currentStep + 1, AppStep.Result) as AppStep);
         set({ currentStep: next }, false, "nextStep");
       },
 
       prevStep: () => {
-        const { currentStep } = get();
-        const prev = Math.max(currentStep - 1, AppStep.Welcome) as AppStep;
+        const { currentStep, capturedPhotos, photoCount } = get();
+        const hasFinishedStrip =
+          photoCount !== null &&
+          capturedPhotos.length > 0 &&
+          capturedPhotos.length === photoCount;
+        // Customization is a loop back to the result, not the start of a new shoot.
+        const prev =
+          currentStep === AppStep.Stickers
+            ? AppStep.Filter
+            : currentStep === AppStep.StripStyle && hasFinishedStrip
+              ? AppStep.Result
+              : (Math.max(currentStep - 1, AppStep.Welcome) as AppStep);
         set({ currentStep: prev }, false, "prevStep");
       },
 
@@ -57,7 +71,12 @@ export const usePhotoboothStore = create<PhotoboothStore>()(
       // ---- Selecciones del usuario -------------------------
       setPhotoCount: (count) => {
         set(
-          { photoCount: count, capturedPhotos: [], stripDataUrl: null },
+          {
+            photoCount: count,
+            capturedPhotos: [],
+            stickers: [],
+            stripDataUrl: null,
+          },
           false,
           "setPhotoCount",
         );
@@ -74,6 +93,19 @@ export const usePhotoboothStore = create<PhotoboothStore>()(
       setFilter: (filter) => {
         set({ filter }, false, "setFilter");
       },
+
+      addSticker: (sticker) =>
+        set((state) => ({ stickers: [...state.stickers, sticker] })),
+      updateSticker: (id, changes) =>
+        set((state) => ({
+          stickers: state.stickers.map((sticker) =>
+            sticker.id === id ? { ...sticker, ...changes } : sticker,
+          ),
+        })),
+      removeSticker: (id) =>
+        set((state) => ({
+          stickers: state.stickers.filter((sticker) => sticker.id !== id),
+        })),
 
       // ---- Captura de fotos --------------------------------
       addCapturedPhoto: (photo) => {
@@ -93,6 +125,21 @@ export const usePhotoboothStore = create<PhotoboothStore>()(
       // ---- Cámara ------------------------------------------
       setCameraActive: (active) => {
         set({ isCameraActive: active }, false, "setCameraActive");
+      },
+
+      repeatSession: () => {
+        const { photoCount, stripBg } = get();
+        set(
+          {
+            currentStep:
+              photoCount && stripBg ? AppStep.Capture : AppStep.PhotoCount,
+            capturedPhotos: [],
+            stripDataUrl: null,
+            isCameraActive: false,
+          },
+          false,
+          "repeatSession",
+        );
       },
 
       // ---- Reset de sesión --------------------------------

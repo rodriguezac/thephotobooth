@@ -1,3 +1,4 @@
+import { useTranslation } from "../../../i18n/useLanguage";
 import { useEffect, useRef, useState } from "react";
 import { useCamera } from "../../../hooks/useCamera";
 import { usePhotoboothStore } from "../../../store/usePhotoboothStore";
@@ -13,8 +14,15 @@ const phrases = [
   "one for the memories",
 ];
 export function CaptureScreen() {
-  const { photoCount, capturedPhotos, addCapturedPhoto, goToStep, prevStep } =
-    usePhotoboothStore();
+  const t = useTranslation();
+  const {
+    photoCount,
+    capturedPhotos,
+    addCapturedPhoto,
+    goToStep,
+    prevStep,
+    resetSession,
+  } = usePhotoboothStore();
   const camera = useCamera();
   const { isStreaming, capture } = camera;
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -75,7 +83,7 @@ export function CaptureScreen() {
   return (
     <section className="screen camera-screen capture-screen">
       <header className="screen-heading">
-        <h1>4. smile :D</h1>
+        <h1>{t("4. smile :D")}</h1>
       </header>
       <CameraView camera={camera}>
         {countdown !== null && (
@@ -104,24 +112,32 @@ export function CaptureScreen() {
         >
           {running
             ? taken >= needed
-              ? "all done!"
+              ? t("all done!")
               : `${taken + 1} / ${needed}`
-            : "START"}
+            : t("START")}
         </button>
         <p className="hype" aria-live="polite">
-          {phrases[phrase]}
+          {t(phrases[phrase])}
         </p>
         <div
           className="capture-dots"
-          aria-label={`${taken} of ${needed} photos taken`}
+          aria-label={t("{taken} of {needed} photos taken", { taken, needed })}
         >
           {Array.from({ length: needed }, (_, i) => (
             <span key={i} className={i < taken ? "filled" : ""} />
           ))}
         </div>
-        <button className="text-button" onClick={prevStep}>
-          ← back
-        </button>
+        <nav
+          className="capture-navigation"
+          aria-label={t("Capture navigation")}
+        >
+          <button className="text-button" onClick={prevStep}>
+            {t("← back")}
+          </button>
+          <button className="text-button" onClick={resetSession}>
+            {t("main menu")}
+          </button>
+        </nav>
       </div>
       <Watermark />
     </section>

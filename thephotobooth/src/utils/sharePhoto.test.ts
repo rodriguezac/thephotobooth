@@ -32,7 +32,7 @@ describe("public photo sharing", () => {
   it.each(["http://localhost:5173/photo.png", "https://other.example/photo.png", "https://res.cloudinary.com/other/image/upload/photo.png"])("rejects invalid returned URL %s", async secure_url => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce({ blob: async () => new Blob(["png"]) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ secure_url }) }));
-    await expect(uploadSharedPhoto(image, config, new AbortController().signal)).rejects.toThrow("enlace válido");
+    await expect(uploadSharedPhoto(image, config, new AbortController().signal)).rejects.toThrow("valid link");
   });
   it("reports an invalid upload preset so the user can fix it", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce({ blob: async () => new Blob(["png"]) })
