@@ -1,5 +1,8 @@
 export const es: Record<string, string> = {
-  "Ampersand": "Símbolo &",
+  "DOWNLOAD FILE": "DESCARGAR ARCHIVO",
+  "Choose a photo app in the share menu, if available. Gallery saving depends on your device.":
+    "Elige una app de fotos en el menú para compartir, si aparece. Guardar en Galería depende de tu dispositivo.",
+  Ampersand: "Símbolo &",
   "Exclamation mark": "Signo de exclamación",
   Camera: "Cámara",
   "Front camera": "Cámara frontal",

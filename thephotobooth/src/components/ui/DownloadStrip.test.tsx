@@ -27,6 +27,10 @@ function ipad() {
 }
 beforeEach(() => {
   vi.clearAllMocks();
+  Object.defineProperty(navigator, "userAgent", {
+    configurable: true,
+    value: "Desktop browser",
+  });
   nextUrl = 0;
   vi.stubGlobal("URL", {
     createObjectURL: vi.fn(() => `blob:photo-${++nextUrl}`),
@@ -64,6 +68,40 @@ describe("saving photo strips", () => {
     expect(screen.getByRole("status").textContent).toBe(
       "Download started! Check Downloads for your photo.",
     );
+  });
+  it("opens the Android file share menu and keeps a separate file download available", async () => {
+    Object.defineProperty(navigator, "userAgent", {
+      configurable: true,
+      value:
+        "Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 Chrome/130 Mobile Safari/537.36",
+    });
+    render(<DownloadStrip imageUrl={first} />);
+    fireEvent.click(screen.getByRole("link", { name: /^DOWNLOAD$/ }));
+    expect(share).toHaveBeenCalledTimes(1);
+    expect(share.mock.calls[0][0].files[0].type).toBe("image/png");
+    await screen.findByText("Done! Your photo was saved or shared.");
+    const fileDownload = screen.getByRole("link", { name: "DOWNLOAD FILE" });
+    expect(fileDownload.getAttribute("download")).toBe("the-photobooth.png");
+    fileDownload.addEventListener("click", (event) => event.preventDefault());
+    fireEvent.click(fileDownload);
+    expect(screen.getByRole("status").textContent).toBe(
+      "Download started! Check Downloads for your photo.",
+    );
+    expect(share).toHaveBeenCalledTimes(1);
+  });
+  it("offers the local image fallback on Android when native file sharing is not supported", () => {
+    Object.defineProperty(navigator, "userAgent", {
+      configurable: true,
+      value: "Mozilla/5.0 (Android)",
+    });
+    canShare.mockReturnValue(false);
+    render(<DownloadStrip imageUrl={first} />);
+    fireEvent.click(screen.getByRole("link", { name: /^DOWNLOAD$/ }));
+    expect(share).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("img", { name: "Your photo strip, ready to save" }),
+    ).toBeTruthy();
+    expect(screen.getByRole("link", { name: "DOWNLOAD FILE" })).toBeTruthy();
   });
   it("prepares a Blob download and revokes old URLs when the image changes or the screen closes", () => {
     const view = render(<DownloadStrip imageUrl={first} />);

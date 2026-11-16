@@ -19,6 +19,8 @@ export function DownloadStrip({
 }) {
   const t = useTranslation();
   const appleTouch = isAppleTouchDevice();
+  const android = /Android/i.test(navigator.userAgent);
+  const nativeSave = appleTouch || android;
   const [resource, setResource] = useState<{ file: File; url: string } | null>(
     null,
   );
@@ -56,7 +58,7 @@ export function DownloadStrip({
       event.preventDefault();
       return;
     }
-    if (!appleTouch) {
+    if (!nativeSave) {
       setNotice("started");
       return;
     } // The browser does not expose completion of a native download.
@@ -106,6 +108,31 @@ export function DownloadStrip({
       >
         {t(saving ? "Opening save options…" : "DOWNLOAD")}
       </a>
+      {android && imageUrl && (
+        <>
+          <p className="save-photo-hint">
+            {t(
+              "Choose a photo app in the share menu, if available. Gallery saving depends on your device.",
+            )}
+          </p>
+          <a
+            className="pill outline"
+            id="btn-download-file"
+            href={downloadUrl ?? imageUrl}
+            download="the-photobooth.png"
+            aria-disabled={saving}
+            onClick={(event) => {
+              if (busy.current) {
+                event.preventDefault();
+                return;
+              }
+              setNotice("started");
+            }}
+          >
+            {t("DOWNLOAD FILE")}
+          </a>
+        </>
+      )}
       {notice && (
         <p className="save-confirmation" role="status">
           {t(
