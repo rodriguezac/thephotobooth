@@ -33,7 +33,9 @@ export function CameraView({
           }
         >
           <option value="user">{t("Front camera")}</option>
-          <option value="environment">{t("Back camera")}</option>
+          {camera.hasRearCamera && (
+            <option value="environment">{t("Back camera")}</option>
+          )}
         </select>
       </div>
       <div className="camera-frame">

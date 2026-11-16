@@ -29,7 +29,7 @@ Las fotos se procesan en el navegador y no se envían automáticamente a un serv
 
 La previsualización final y la descarga usan el mismo PNG generado con Canvas 2D, evitando diferencias de encuadre, filtro o distribución. Los tests cubren el ciclo de vida de cámara, permisos tardíos, reintentos, captura sin dimensiones y exportación de 1-4 fotos.
 
-El selector `Front camera` / `Back camera` aparece antes de capturar. La elección se conserva entre filtro, captura y `Repeat`. Cambiarla libera la cámara anterior antes de solicitar la nueva; la cámara trasera se solicita de forma explícita y, si no está disponible, se puede volver a la frontal. Solo la frontal usa efecto espejo en vista previa y captura. El selector se bloquea mientras se toma la secuencia.
+El selector `Front camera` / `Back camera` aparece antes de capturar. La opción trasera se muestra únicamente cuando los dispositivos disponibles, sus capacidades o sus etiquetas identifican una cámara trasera después de conceder permiso; tener dos webcams no basta. Si el navegador no expone esa información, la opción permanece oculta. La lista se actualiza al cambiar los dispositivos. La elección se conserva entre filtro, captura y `Repeat`. Cambiarla libera la cámara anterior antes de solicitar la nueva; la cámara trasera se solicita de forma explícita y, si deja de estar disponible, se oculta y se vuelve automáticamente a la frontal. Solo la frontal usa efecto espejo en vista previa y captura. El selector se bloquea mientras se toma la secuencia.
 
 ## Guardado en iPhone y iPad
 

@@ -20,12 +20,17 @@ function mockStream() {
   };
 }
 let getUserMedia: ReturnType<typeof vi.fn>;
+let enumerateDevices: ReturnType<typeof vi.fn>;
 beforeEach(() => {
   usePhotoboothStore.getState().resetSession();
   getUserMedia = vi.fn();
+  enumerateDevices = vi.fn().mockResolvedValue([
+    { kind: "videoinput", label: "Front Camera" },
+    { kind: "videoinput", label: "Back Camera" },
+  ]);
   Object.defineProperty(navigator, "mediaDevices", {
     configurable: true,
-    value: { getUserMedia },
+    value: { getUserMedia, enumerateDevices },
   });
   vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue();
   Object.defineProperty(HTMLVideoElement.prototype, "videoWidth", {
@@ -86,7 +91,7 @@ describe("camera lifecycle", () => {
     camera.capture();
     expect(ctx.scale).toHaveBeenCalledWith(-1, 1);
   });
-  it("reports an unavailable back camera and recovers when the user selects the front camera", async () => {
+  it("returns to the front camera and hides the back option if the rear camera becomes unavailable", async () => {
     getUserMedia
       .mockResolvedValueOnce(mockStream())
       .mockRejectedValueOnce(
@@ -94,13 +99,46 @@ describe("camera lifecycle", () => {
       )
       .mockResolvedValueOnce(mockStream());
     render(<Camera />);
-    await waitFor(() => expect(camera.isStreaming).toBe(true));
+    await waitFor(() => expect(camera.hasRearCamera).toBe(true));
+    // Some browsers keep listing a camera even after it cannot be opened.
     act(() => camera.setFacingMode("environment"));
-    await waitFor(() => expect(camera.error).toContain("Try the front camera"));
-    expect(camera.isStreaming).toBe(false);
-    act(() => camera.setFacingMode("user"));
+    await waitFor(() => expect(camera.facingMode).toBe("user"));
     await waitFor(() => expect(camera.isStreaming).toBe(true));
-    expect(camera.error).toBeNull();
+    expect(camera.hasRearCamera).toBe(false);
+    expect(getUserMedia).toHaveBeenCalledTimes(3);
+  });
+  it("does not offer a back camera for a laptop with multiple ordinary webcams", async () => {
+    enumerateDevices.mockResolvedValue([
+      { kind: "videoinput", label: "Integrated Webcam" },
+      { kind: "videoinput", label: "USB Camera" },
+    ]);
+    getUserMedia.mockResolvedValue(mockStream());
+    render(<Camera />);
+    await waitFor(() => expect(enumerateDevices).toHaveBeenCalled());
+    expect(camera.hasRearCamera).toBe(false);
+    expect(getUserMedia).toHaveBeenCalledTimes(1);
+  });
+  it("updates rear camera availability on device changes without restarting a working front stream", async () => {
+    let changed!: () => void;
+    const remove = vi.fn();
+    Object.assign(navigator.mediaDevices, {
+      addEventListener: vi.fn((_name: string, listener: () => void) => {
+        changed = listener;
+      }),
+      removeEventListener: remove,
+    });
+    getUserMedia.mockResolvedValue(mockStream());
+    const view = render(<Camera />);
+    await waitFor(() => expect(camera.hasRearCamera).toBe(true));
+    enumerateDevices.mockResolvedValue([
+      { kind: "videoinput", label: "Integrated Webcam" },
+    ]);
+    await act(async () => changed());
+    expect(camera.hasRearCamera).toBe(false);
+    expect(camera.isStreaming).toBe(true);
+    expect(getUserMedia).toHaveBeenCalledTimes(1);
+    view.unmount();
+    expect(remove).toHaveBeenCalledWith("devicechange", changed);
   });
   it("stops an obsolete permission response during StrictMode remount and releases the active stream", async () => {
     let resolveOld!: (value: unknown) => void;

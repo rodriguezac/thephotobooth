@@ -1,12 +1,16 @@
 import { useRef, useEffect, useCallback, useState } from "react";
 import type { CapturedPhoto } from "../types/photobooth.types";
 import { usePhotoboothStore, selectFilter } from "../store/usePhotoboothStore";
+import { hasRearVideoInput } from "../utils/cameraDevices";
 import { FILTER_OPTIONS } from "../utils/constants";
 
 export function useCamera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const requestRef = useRef(0);
+  const deviceScanRef = useRef(0);
+  const rejectedRearRef = useRef(false);
+  const [hasRearCamera, setHasRearCamera] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,8 +20,32 @@ export function useCamera() {
   const activeOption = FILTER_OPTIONS.find((f) => f.value === filter);
   const cssFilter = activeOption?.cssFilter ?? "none";
 
+  const refreshCameras = useCallback(async () => {
+    const scan = ++deviceScanRef.current;
+    const request = requestRef.current;
+    let devices: MediaDeviceInfo[] = [];
+    try {
+      devices = (await navigator.mediaDevices?.enumerateDevices?.()) ?? [];
+    } catch {
+      /* Keep a working front camera if device information is unavailable. */
+    }
+    if (scan !== deviceScanRef.current || request !== requestRef.current)
+      return;
+    const rearAvailable =
+      !rejectedRearRef.current &&
+      hasRearVideoInput(devices, streamRef.current?.getVideoTracks()[0]);
+    setHasRearCamera(rearAvailable);
+    if (
+      !rearAvailable &&
+      usePhotoboothStore.getState().cameraFacing === "environment"
+    ) {
+      usePhotoboothStore.getState().setCameraFacing("user");
+    }
+  }, []);
+
   const stopCamera = useCallback(() => {
     requestRef.current++;
+    deviceScanRef.current++;
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
     if (videoRef.current) videoRef.current.srcObject = null;
@@ -64,11 +92,14 @@ export function useCamera() {
       // 'playing' can precede the play promise; dimensions guard captures too.
       setIsStreaming(video.readyState >= 2 && video.videoWidth > 0);
       setIsStarting(false);
+      // Permission has been granted, so the browser can expose available camera metadata.
+      void refreshCameras();
       stream.getVideoTracks().forEach((track) => {
         track.onended = () => {
           if (request !== requestRef.current) return;
           stopCamera();
           setError("The camera was disconnected. Reconnect it and try again.");
+          void refreshCameras();
         };
       });
     } catch (err) {
@@ -76,6 +107,15 @@ export function useCamera() {
       stopCamera();
       const name =
         err && typeof err === "object" && "name" in err ? String(err.name) : "";
+      if (
+        facingMode === "environment" &&
+        (name === "NotFoundError" || name === "OverconstrainedError")
+      ) {
+        rejectedRearRef.current = true;
+        setHasRearCamera(false);
+        setFacingMode("user");
+        return;
+      }
       setError(
         name === "NotAllowedError"
           ? "Camera permission denied. Allow camera access in your browser and device privacy settings."
@@ -92,7 +132,7 @@ export function useCamera() {
                   : "Could not start the camera. Please try again.",
       );
     }
-  }, [stopCamera, facingMode]);
+  }, [stopCamera, facingMode, setFacingMode, refreshCameras]);
 
   const onPlaying = useCallback(() => {
     if (
@@ -151,8 +191,19 @@ export function useCamera() {
     return stopCamera;
   }, [startCamera, stopCamera]);
 
+  useEffect(() => {
+    const media = navigator.mediaDevices;
+    const onDeviceChange = () => {
+      rejectedRearRef.current = false;
+      void refreshCameras();
+    };
+    media?.addEventListener?.("devicechange", onDeviceChange);
+    return () => media?.removeEventListener?.("devicechange", onDeviceChange);
+  }, [refreshCameras]);
+
   return {
     videoRef,
+    hasRearCamera,
     facingMode,
     setFacingMode,
     isMirrored: facingMode === "user",
