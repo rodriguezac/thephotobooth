@@ -1,4 +1,6 @@
 export const es: Record<string, string> = {
+  "Ampersand": "Símbolo &",
+  "Exclamation mark": "Signo de exclamación",
   Camera: "Cámara",
   "Front camera": "Cámara frontal",
   "Back camera": "Cámara trasera",

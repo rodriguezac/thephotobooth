@@ -167,91 +167,12 @@ const assets = [
   { id: "[SUPERSTAR].png", label: "Superstar", file: "[SUPERSTAR].png" },
   { id: "[SWAG].png", label: "Swag", file: "[SWAG].png" },
   { id: "IMG_6115.PNG", label: "Extra sticker 2", file: "IMG_6115.PNG" },
-  {
-    id: "A.png",
-    label: "Letter A",
-    file: "A.png",
-  },
-  {
-    id: "B.png",
-    label: "Letter B",
-    file: "B.png",
-  },
-  {
-    id: "C.png",
-    label: "Letter C",
-    file: "C.png",
-  },
-  {
-    id: "D.png",
-    label: "Letter D",
-    file: "D.png",
-  },
-  {
-    id: "E.png",
-    label: "Letter E",
-    file: "E.png",
-  },
-  {
-    id: "J.png",
-    label: "Letter J",
-    file: "J.png",
-  },
-  {
-    id: "K.png",
-    label: "Letter K",
-    file: "K.png",
-  },
-  {
-    id: "L.png",
-    label: "Letter L",
-    file: "L.png",
-  },
-  {
-    id: "M.png",
-    label: "Letter M",
-    file: "M.png",
-  },
-  {
-    id: "N.png",
-    label: "Letter N",
-    file: "N.png",
-  },
-  {
-    id: "O.png",
-    label: "Letter O",
-    file: "O.png",
-  },
-  {
-    id: "T.png",
-    label: "Letter T",
-    file: "T.png",
-  },
-  {
-    id: "U.png",
-    label: "Letter U",
-    file: "U.png",
-  },
-  {
-    id: "V.png",
-    label: "Letter V",
-    file: "V.png",
-  },
-  {
-    id: "W.png",
-    label: "Letter W",
-    file: "W.png",
-  },
-  {
-    id: "X.png",
-    label: "Letter X",
-    file: "X.png",
-  },
-  {
-    id: "Y.png",
-    label: "Letter Y",
-    file: "Y.png",
-  },
+  ...Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ", (letter) => {
+    const file = letter === "S" ? "S.PNG" : `${letter}.png`;
+    return { id: file, label: `Letter ${letter}`, file };
+  }),
+  { id: "AND.png", label: "Ampersand", file: "AND.png" },
+  { id: "exclamation.png", label: "Exclamation mark", file: "exclamation.png" },
 ];
 
 export const STICKER_OPTIONS: StickerAsset[] = assets.map(
