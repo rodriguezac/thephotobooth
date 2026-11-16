@@ -41,7 +41,7 @@ El componente `ShareQr` y sus pruebas se conservan para una versión futura, per
 
 El repositorio contiene `netlify.toml` en la raíz: usa `thephotobooth` como carpeta base, Node 22, `npm run build` y publica `dist`. No subas `.env.local`, `work` ni `node_modules`.
 
-Producción: https://thephotobboth-raspaorojo.netlify.app/
+Producción: https://thephotobooth-raspaorojo.netlify.app/
 
 Al conectar el proyecto de Netlify a `rodriguezac/thephotobooth` con `main` como rama de producción, cada push a `main` inicia un build y publica el resultado si termina correctamente. Los cambios locales necesitan commit y push para publicarse.
 
