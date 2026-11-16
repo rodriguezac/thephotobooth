@@ -1116,3 +1116,10 @@ select {
   .pill, .step-navigation .pill, .text-button, .pill-select { min-height: 44px; }
   .page-arrow { width: 44px; height: 44px; }
 }
+
+@media (max-width: 700px) and (orientation: portrait) {
+  .screen { padding-bottom: 84px; }
+  .welcome { padding-bottom: 112px; }
+  .welcome .watermark { bottom: max(80px, env(safe-area-inset-bottom)); }
+  .paper-note { width: min(610px, 85vw, calc(100dvh - 176px)); }
+}
