@@ -1123,3 +1123,14 @@ select {
   .welcome .watermark { bottom: max(80px, env(safe-area-inset-bottom)); }
   .paper-note { width: min(610px, 85vw, calc(100dvh - 176px)); }
 }
+
+.strip-credit-surface { position: relative; }
+.strip-credit-link { position: absolute; z-index: 1; min-height: 24px; min-width: 44px; border-radius: 3px; }
+.strip-credit-link:hover { background: #ff0da21a; }
+.strip-credit-link:focus-visible { outline: 2px solid var(--pink); outline-offset: 1px; }
+.strip-zoom-sheet { width: fit-content; max-width: 100%; }
+.save-photo-card .strip-credit-surface { width: 100%; }
+.save-confirmation { padding: 10px; border: 1px solid var(--pink); border-radius: 12px; color: #9b005f; background: #fff0fa; font: 13px/1.5 system-ui, sans-serif; text-align: center; }
+.camera-source { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; width: min(360px, 100%); font-size: 12px; }
+.camera-source select { min-height: 44px; max-width: 100%; border: 1.5px solid var(--pink); border-radius: 999px; padding: 8px 16px; color: var(--pink); background: white; font-size: 12px; }
+.sticker-board .strip-credit-link { z-index: 0; }

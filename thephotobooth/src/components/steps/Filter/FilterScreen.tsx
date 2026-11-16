@@ -1,4 +1,5 @@
 import { useTranslation } from "../../../i18n/useLanguage";
+import { StripCreditLink } from "../../ui/StripCreditLink";
 import { getStripLayout } from "../../../utils/stripLayout";
 import { usePhotoboothStore } from "../../../store/usePhotoboothStore";
 import { FILTER_OPTIONS } from "../../../utils/constants";
@@ -80,11 +81,14 @@ function CapturedStripFilterScreen() {
           style={{ aspectRatio: `${layout.width} / ${layout.height}` }}
         >
           {url ? (
-            <img
-              className="customize-strip"
-              src={url}
-              alt={t("Your strip with the selected style and filter")}
-            />
+            <div className="strip-credit-surface">
+              <img
+                className="customize-strip"
+                src={url}
+                alt={t("Your strip with the selected style and filter")}
+              />
+              <StripCreditLink photoCount={capturedPhotos.length} />
+            </div>
           ) : (
             <p className="printing" role="status">
               {error ? t("oops :(") : t("updating strip…")}

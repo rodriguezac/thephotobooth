@@ -7,10 +7,12 @@ export function ArtFilterPreview({
   videoRef,
   filter,
   streaming,
+  mirrored = true,
 }: {
   videoRef: RefObject<HTMLVideoElement>;
   filter: PhotoFilter;
   streaming: boolean;
+  mirrored?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -58,6 +60,7 @@ export function ArtFilterPreview({
       width="320"
       height="240"
       className="camera-art-preview"
+      style={{ transform: mirrored ? "scaleX(-1)" : "none" }}
       aria-hidden="true"
     />
   );

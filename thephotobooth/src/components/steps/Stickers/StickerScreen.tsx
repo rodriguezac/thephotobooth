@@ -1,3 +1,4 @@
+import { StripCreditLink } from "../../ui/StripCreditLink";
 import { useTranslation } from "../../../i18n/useLanguage";
 import { useEffect, useRef, useState } from "react";
 import type { DragEvent, KeyboardEvent } from "react";
@@ -196,6 +197,7 @@ export function StickerScreen() {
               {error ? t("oops :(") : t("loading strip…")}
             </p>
           )}
+          {url && <StripCreditLink photoCount={capturedPhotos.length || 1} />}
           {url &&
             stickers.map((sticker) => (
               <div

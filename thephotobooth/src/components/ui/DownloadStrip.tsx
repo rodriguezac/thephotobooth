@@ -1,3 +1,4 @@
+import { StripCreditLink } from "./StripCreditLink";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent } from "react";
 import { useTranslation } from "../../i18n/useLanguage";
@@ -9,7 +10,13 @@ function isAppleTouchDevice() {
   );
 }
 
-export function DownloadStrip({ imageUrl }: { imageUrl: string | null }) {
+export function DownloadStrip({
+  imageUrl,
+  photoCount = 1,
+}: {
+  imageUrl: string | null;
+  photoCount?: number;
+}) {
   const t = useTranslation();
   const appleTouch = isAppleTouchDevice();
   const [resource, setResource] = useState<{ file: File; url: string } | null>(
@@ -18,6 +25,7 @@ export function DownloadStrip({ imageUrl }: { imageUrl: string | null }) {
   const [showSaveImage, setShowSaveImage] = useState(false);
   const [saving, setSaving] = useState(false);
   const busy = useRef(false);
+  const [notice, setNotice] = useState<"started" | "completed" | null>(null);
   // Prepare synchronously before the tap: iPad file sharing requires user activation.
   const file = useMemo(() => {
     if (!imageUrl) return null;
@@ -33,6 +41,7 @@ export function DownloadStrip({ imageUrl }: { imageUrl: string | null }) {
   }, [imageUrl]);
   useEffect(() => {
     setShowSaveImage(false);
+    setNotice(null);
     if (!file || typeof URL.createObjectURL !== "function") {
       setResource(null);
       return;
@@ -47,8 +56,12 @@ export function DownloadStrip({ imageUrl }: { imageUrl: string | null }) {
       event.preventDefault();
       return;
     }
-    if (!appleTouch) return; // Native Blob download on desktop and Android.
+    if (!appleTouch) {
+      setNotice("started");
+      return;
+    } // The browser does not expose completion of a native download.
     event.preventDefault();
+    setNotice(null);
     let canShare = false;
     try {
       canShare = Boolean(
@@ -67,6 +80,7 @@ export function DownloadStrip({ imageUrl }: { imageUrl: string | null }) {
     setSaving(true);
     try {
       await navigator.share({ files: [file] });
+      setNotice("completed");
     } catch (error) {
       if (!(
         error &&
@@ -92,6 +106,15 @@ export function DownloadStrip({ imageUrl }: { imageUrl: string | null }) {
       >
         {t(saving ? "Opening save options…" : "DOWNLOAD")}
       </a>
+      {notice && (
+        <p className="save-confirmation" role="status">
+          {t(
+            notice === "started"
+              ? "Download started! Check Downloads for your photo."
+              : "Done! Your photo was saved or shared.",
+          )}
+        </p>
+      )}
       {appleTouch && imageUrl && (
         <p className="save-photo-hint">
           {t("Choose Save Image or Save to Files in the save menu.")}
@@ -104,11 +127,14 @@ export function DownloadStrip({ imageUrl }: { imageUrl: string | null }) {
               "Touch and hold the image below to save it, or open it in a new tab.",
             )}
           </p>
-          <img
-            className="save-photo-preview"
-            src={downloadUrl ?? imageUrl}
-            alt={t("Your photo strip, ready to save")}
-          />
+          <div className="strip-credit-surface">
+            <img
+              className="save-photo-preview"
+              src={downloadUrl ?? imageUrl}
+              alt={t("Your photo strip, ready to save")}
+            />
+            <StripCreditLink photoCount={photoCount} />
+          </div>
           <a
             className="text-button"
             href={downloadUrl ?? imageUrl}

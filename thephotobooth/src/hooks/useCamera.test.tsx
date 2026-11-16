@@ -2,6 +2,7 @@
 import { StrictMode } from "react";
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { usePhotoboothStore } from "../store/usePhotoboothStore";
 import { useCamera } from "./useCamera";
 
 let camera: ReturnType<typeof useCamera>;
@@ -20,6 +21,7 @@ function mockStream() {
 }
 let getUserMedia: ReturnType<typeof vi.fn>;
 beforeEach(() => {
+  usePhotoboothStore.getState().resetSession();
   getUserMedia = vi.fn();
   Object.defineProperty(navigator, "mediaDevices", {
     configurable: true,
@@ -45,6 +47,61 @@ afterEach(() => {
 });
 
 describe("camera lifecycle", () => {
+  it("releases the front camera before starting the back camera and mirrors only selfies", async () => {
+    const front = mockStream(),
+      back = mockStream(),
+      frontAgain = mockStream();
+    getUserMedia
+      .mockResolvedValueOnce(front)
+      .mockResolvedValueOnce(back)
+      .mockResolvedValueOnce(frontAgain);
+    const ctx = { translate: vi.fn(), scale: vi.fn(), drawImage: vi.fn() };
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
+      ctx as unknown as CanvasRenderingContext2D,
+    );
+    vi.spyOn(HTMLCanvasElement.prototype, "toDataURL").mockReturnValue(
+      "data:image/jpeg;base64,test",
+    );
+    render(<Camera />);
+    await waitFor(() => expect(camera.isStreaming).toBe(true));
+    act(() => camera.setFacingMode("environment"));
+    await waitFor(() => expect(getUserMedia).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(camera.isStreaming).toBe(true));
+    expect(front.track.stop).toHaveBeenCalledOnce();
+    expect(getUserMedia).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        video: expect.objectContaining({
+          facingMode: { exact: "environment" },
+        }),
+      }),
+    );
+    expect(camera.isMirrored).toBe(false);
+    expect(camera.capture()).not.toBeNull();
+    expect(ctx.scale).not.toHaveBeenCalled();
+    act(() => camera.setFacingMode("user"));
+    await waitFor(() => expect(getUserMedia).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(camera.isStreaming).toBe(true));
+    expect(back.track.stop).toHaveBeenCalledOnce();
+    expect(camera.isMirrored).toBe(true);
+    camera.capture();
+    expect(ctx.scale).toHaveBeenCalledWith(-1, 1);
+  });
+  it("reports an unavailable back camera and recovers when the user selects the front camera", async () => {
+    getUserMedia
+      .mockResolvedValueOnce(mockStream())
+      .mockRejectedValueOnce(
+        new DOMException("Missing back camera", "OverconstrainedError"),
+      )
+      .mockResolvedValueOnce(mockStream());
+    render(<Camera />);
+    await waitFor(() => expect(camera.isStreaming).toBe(true));
+    act(() => camera.setFacingMode("environment"));
+    await waitFor(() => expect(camera.error).toContain("Try the front camera"));
+    expect(camera.isStreaming).toBe(false);
+    act(() => camera.setFacingMode("user"));
+    await waitFor(() => expect(camera.isStreaming).toBe(true));
+    expect(camera.error).toBeNull();
+  });
   it("stops an obsolete permission response during StrictMode remount and releases the active stream", async () => {
     let resolveOld!: (value: unknown) => void;
     const old = mockStream();
@@ -88,7 +145,9 @@ describe("camera lifecycle", () => {
       new DOMException("denied", "NotAllowedError"),
     );
     render(<Camera />);
-    await waitFor(() => expect(camera.error).toContain("Camera permission denied"));
+    await waitFor(() =>
+      expect(camera.error).toContain("Camera permission denied"),
+    );
     expect(camera.isStreaming).toBe(false);
     const stream = mockStream();
     getUserMedia.mockResolvedValueOnce(stream);

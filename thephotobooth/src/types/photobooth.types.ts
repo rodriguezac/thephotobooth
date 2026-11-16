@@ -157,6 +157,7 @@ export interface PhotoboothState {
 
   /** Indica si la cámara está activa */
   isCameraActive: boolean;
+  cameraFacing: "user" | "environment";
 }
 
 // ------------------------------------------------------------
@@ -201,6 +202,7 @@ export interface PhotoboothActions {
 
   /** Activa/desactiva el estado de la cámara */
   setCameraActive: (active: boolean) => void;
+  setCameraFacing: (facing: "user" | "environment") => void;
 
   /** Retake photos while keeping the current style, filter and stickers. */
   repeatSession: () => void;

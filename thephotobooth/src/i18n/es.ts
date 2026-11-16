@@ -1,4 +1,13 @@
 export const es: Record<string, string> = {
+  Camera: "Cámara",
+  "Front camera": "Cámara frontal",
+  "Back camera": "Cámara trasera",
+  "This camera is not available. Try the front camera.":
+    "Esta cámara no está disponible. Prueba la cámara frontal.",
+  "Download started! Check Downloads for your photo.":
+    "¡Descarga iniciada! Busca tu foto en Descargas.",
+  "Done! Your photo was saved or shared.":
+    "¡Listo! Tu foto se guardó o se compartió.",
   "Opening save options…": "Abriendo opciones para guardar…",
   "Choose Save Image or Save to Files in the save menu.":
     "Elige Guardar imagen o Guardar en Archivos en el menú para guardar.",

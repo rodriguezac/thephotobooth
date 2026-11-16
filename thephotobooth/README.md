@@ -29,13 +29,15 @@ Las fotos se procesan en el navegador y no se envían automáticamente a un serv
 
 La previsualización final y la descarga usan el mismo PNG generado con Canvas 2D, evitando diferencias de encuadre, filtro o distribución. Los tests cubren el ciclo de vida de cámara, permisos tardíos, reintentos, captura sin dimensiones y exportación de 1-4 fotos.
 
+El selector `Front camera` / `Back camera` aparece antes de capturar. La elección se conserva entre filtro, captura y `Repeat`. Cambiarla libera la cámara anterior antes de solicitar la nueva; la cámara trasera se solicita de forma explícita y, si no está disponible, se puede volver a la frontal. Solo la frontal usa efecto espejo en vista previa y captura. El selector se bloquea mientras se toma la secuencia.
+
 ## Guardado en iPhone y iPad
 
-La descarga de escritorio usa un Blob con nombre PNG. En dispositivos Apple táctiles se prepara el archivo antes del toque y se invoca el menú nativo de guardado cuando `navigator.canShare({ files })` lo admite. Si esa opción falla o no existe, se muestra la tira para mantenerla presionada y guardarla, junto a un enlace para abrir la imagen. Cancelar el menú no se trata como error.
+La descarga de escritorio usa un Blob con nombre PNG. En dispositivos Apple táctiles se prepara el archivo antes del toque y se invoca el menú nativo de guardado cuando `navigator.canShare({ files })` lo admite. Si esa opción falla o no existe, se muestra la tira para mantenerla presionada y guardarla, junto a un enlace para abrir la imagen. Cancelar el menú no se trata como error. El mensaje de escritorio confirma el inicio de la descarga, ya que el navegador no informa de su escritura final al disco; el menú nativo confirma la acción de guardar o compartir cuando se completa.
 
 Referencia de activación del usuario en WebKit: https://webkit.org/blog/13862/the-user-activation-api/
 
-El fondo del inicio cubre el viewport dinámico, con un fondo fijo para evitar espacios blancos al cambiar de orientación o al cambiar la altura de las barras del navegador. El enlace `@raspaorojo` abre Instagram en otra pestaña.
+El fondo del inicio cubre el viewport dinámico, con un fondo fijo para evitar espacios blancos al cambiar de orientación o al cambiar la altura de las barras del navegador. Todos los créditos `@raspaorojo` de la web abren Instagram en otra pestaña, incluidos los de las vistas de la tira, personalización, stickers, vista ampliada y guardado alternativo. Los créditos dentro de las imágenes se enlazan mediante una zona interactiva sobre la vista web; el PNG descargado conserva el texto, pero no admite enlaces interactivos.
 
 ## Patrón desde la galería
 

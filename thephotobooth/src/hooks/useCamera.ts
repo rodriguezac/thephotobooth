@@ -11,6 +11,8 @@ export function useCamera() {
   const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const filter = usePhotoboothStore(selectFilter);
+  const facingMode = usePhotoboothStore((state) => state.cameraFacing);
+  const setFacingMode = usePhotoboothStore((state) => state.setCameraFacing);
   const activeOption = FILTER_OPTIONS.find((f) => f.value === filter);
   const cssFilter = activeOption?.cssFilter ?? "none";
 
@@ -38,7 +40,10 @@ export function useCamera() {
         video: {
           width: { ideal: 1280 },
           height: { ideal: 960 },
-          facingMode: "user",
+          facingMode:
+            facingMode === "environment"
+              ? { exact: "environment" }
+              : { ideal: "user" },
         },
         audio: false,
       });
@@ -75,15 +80,19 @@ export function useCamera() {
         name === "NotAllowedError"
           ? "Camera permission denied. Allow camera access in your browser and device privacy settings."
           : name === "NotFoundError"
-            ? "No camera found. Connect one and try again."
-            : name === "NotReadableError"
-              ? "The camera is busy or unavailable. Close other apps using it and try again."
-              : err instanceof Error && name === "Error"
-                ? err.message
-                : "Could not start the camera. Please try again.",
+            ? facingMode === "environment"
+              ? "This camera is not available. Try the front camera."
+              : "No camera found. Connect one and try again."
+            : name === "OverconstrainedError"
+              ? "This camera is not available. Try the front camera."
+              : name === "NotReadableError"
+                ? "The camera is busy or unavailable. Close other apps using it and try again."
+                : err instanceof Error && name === "Error"
+                  ? err.message
+                  : "Could not start the camera. Please try again.",
       );
     }
-  }, [stopCamera]);
+  }, [stopCamera, facingMode]);
 
   const onPlaying = useCallback(() => {
     if (
@@ -115,8 +124,10 @@ export function useCamera() {
     const ratio = 4 / 3;
     const sw = Math.min(video.videoWidth, video.videoHeight * ratio);
     const sh = sw / ratio;
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
+    if (facingMode === "user") {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
     ctx.drawImage(
       video,
       (video.videoWidth - sw) / 2,
@@ -133,7 +144,7 @@ export function useCamera() {
       dataUrl: canvas.toDataURL("image/jpeg", 0.95),
       takenAt: Date.now(),
     };
-  }, []);
+  }, [facingMode]);
 
   useEffect(() => {
     void startCamera();
@@ -142,6 +153,9 @@ export function useCamera() {
 
   return {
     videoRef,
+    facingMode,
+    setFacingMode,
+    isMirrored: facingMode === "user",
     isStreaming,
     isStarting,
     error,

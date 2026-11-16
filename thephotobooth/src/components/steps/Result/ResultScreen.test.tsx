@@ -44,6 +44,18 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("result session actions", () => {
+  it("links every web credit, including the strip and enlarged view, without nesting links inside buttons", () => {
+    const view = render(<ResultScreen />);
+    const credits = view.container.querySelectorAll(
+      'a[href="https://www.instagram.com/raspaorojo/"]',
+    );
+    expect(credits).toHaveLength(3);
+    credits.forEach((link) => {
+      expect(link.getAttribute("target")).toBe("_blank");
+      expect(link.getAttribute("rel")).toContain("noopener");
+    });
+    expect(view.container.querySelector("button a")).toBeNull();
+  });
   it("Repeat retakes photos while preserving every chosen setting", () => {
     render(<ResultScreen />);
     fireEvent.click(screen.getByRole("button", { name: "REPEAT" }));

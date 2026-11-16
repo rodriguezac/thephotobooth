@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { usePhotoboothStore } from "../../../store/usePhotoboothStore";
 import { AppStep } from "../../../types/photobooth.types";
 import { useStripPreview } from "../../../hooks/useStripPreview";
+import { StripCreditLink } from "../../ui/StripCreditLink";
 import { DownloadStrip } from "../../ui/DownloadStrip";
 import { Watermark } from "../../ui/Watermark";
 export function ResultScreen() {
@@ -19,7 +20,7 @@ export function ResultScreen() {
   } = usePhotoboothStore();
   const zoomRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const previewRef = useRef<HTMLButtonElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const zoomAnimation = useRef<Animation | null>(null);
 
   const getZoomOrigin = () => {
@@ -97,20 +98,23 @@ export function ResultScreen() {
             style={{ aspectRatio: `${layout.width} / ${layout.height}` }}
           >
             {url ? (
-              <button
-                ref={triggerRef}
-                className="strip-zoom-trigger"
-                aria-label={t("Enlarge photo strip")}
-                onClick={openZoom}
-              >
-                <img
-                  className="finished-strip"
-                  src={url}
-                  alt={t("Your finished strip with {count} photos", {
-                    count: capturedPhotos.length,
-                  })}
-                />
-              </button>
+              <div className="strip-credit-surface">
+                <button
+                  ref={triggerRef}
+                  className="strip-zoom-trigger"
+                  aria-label={t("Enlarge photo strip")}
+                  onClick={openZoom}
+                >
+                  <img
+                    className="finished-strip"
+                    src={url}
+                    alt={t("Your finished strip with {count} photos", {
+                      count: capturedPhotos.length,
+                    })}
+                  />
+                </button>
+                <StripCreditLink photoCount={capturedPhotos.length || 1} />
+              </div>
             ) : (
               <p className="printing" role="status">
                 {error ? t("oops :(") : t("printing…")}
@@ -119,7 +123,10 @@ export function ResultScreen() {
           </div>
         </div>
         <div className="result-actions">
-          <DownloadStrip imageUrl={url} />
+          <DownloadStrip
+            imageUrl={url}
+            photoCount={capturedPhotos.length || 1}
+          />
           <button
             className="pill outline"
             id="btn-repeat"
@@ -164,14 +171,19 @@ export function ResultScreen() {
         }}
       >
         {url && (
-          <button
+          <div
+            className="strip-credit-surface strip-zoom-sheet"
             ref={previewRef}
-            className="strip-zoom-close"
-            aria-label={t("Close enlarged photo strip")}
-            onClick={closeZoom}
           >
-            <img src={url} alt={t("Enlarged photo strip")} />
-          </button>
+            <button
+              className="strip-zoom-close"
+              aria-label={t("Close enlarged photo strip")}
+              onClick={closeZoom}
+            >
+              <img src={url} alt={t("Enlarged photo strip")} />
+            </button>
+            <StripCreditLink photoCount={capturedPhotos.length || 1} />
+          </div>
         )}
       </dialog>
       <Watermark />

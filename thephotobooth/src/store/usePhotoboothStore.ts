@@ -28,6 +28,7 @@ const initialState: PhotoboothState = {
   stickers: [],
   stripDataUrl: null,
   isCameraActive: false,
+  cameraFacing: "user",
 };
 
 // ------------------------------------------------------------
@@ -98,6 +99,9 @@ export const usePhotoboothStore = create<PhotoboothStore>()(
       setActiveStyleTab: (tab) => {
         set({ activeStyleTab: tab }, false, "setActiveStyleTab");
       },
+
+      setCameraFacing: (cameraFacing) =>
+        set({ cameraFacing }, false, "setCameraFacing"),
 
       setFilter: (filter) => {
         set({ filter }, false, "setFilter");

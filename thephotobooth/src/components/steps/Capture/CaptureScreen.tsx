@@ -85,7 +85,7 @@ export function CaptureScreen() {
       <header className="screen-heading">
         <h1>{t("4. smile :D")}</h1>
       </header>
-      <CameraView camera={camera}>
+      <CameraView camera={camera} switchingDisabled={running}>
         {countdown !== null && (
           <span className="countdown" role="status">
             {countdown}

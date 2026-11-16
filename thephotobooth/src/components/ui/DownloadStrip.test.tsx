@@ -56,6 +56,15 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe("saving photo strips", () => {
+  it("confirms that a browser download was started without claiming that it has finished saving", () => {
+    render(<DownloadStrip imageUrl={first} />);
+    const link = screen.getByRole("link", { name: "DOWNLOAD" });
+    link.addEventListener("click", (event) => event.preventDefault());
+    fireEvent.click(link);
+    expect(screen.getByRole("status").textContent).toBe(
+      "Download started! Check Downloads for your photo.",
+    );
+  });
   it("prepares a Blob download and revokes old URLs when the image changes or the screen closes", () => {
     const view = render(<DownloadStrip imageUrl={first} />);
     const download = screen.getByRole("link", { name: "DOWNLOAD" });
@@ -78,6 +87,9 @@ describe("saving photo strips", () => {
     expect(data.files[0].name).toBe("the-photobooth.png");
     expect(data.files[0].type).toBe("image/png");
     expect(data.files[0].size).toBe(5);
+    expect(
+      await screen.findByText("Done! Your photo was saved or shared."),
+    ).toBeTruthy();
     await waitFor(() =>
       expect(
         screen
@@ -129,5 +141,6 @@ describe("saving photo strips", () => {
       expect(screen.getByRole("link", { name: "DOWNLOAD" })).toBeTruthy(),
     );
     expect(screen.queryByRole("img")).toBeNull();
+    expect(screen.queryByRole("status")).toBeNull();
   });
 });
