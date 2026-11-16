@@ -1,4 +1,20 @@
 export const es: Record<string, string> = {
+  "your image": "tu imagen",
+  "Your image": "Tu imagen",
+  "Upload image": "Subir imagen",
+  "Replace image": "Cambiar imagen",
+  "Choose pattern image": "Elegir imagen para el patrón",
+  "Use your image as a pattern": "Usar tu imagen como patrón",
+  "Choose an image from your gallery to repeat as a pattern. Your image stays on this device.":
+    "Elige una imagen de tu galería para repetirla como patrón. Tu imagen se queda en este dispositivo.",
+  "Up to 15 MB. JPG, PNG and WebP recommended.":
+    "Hasta 15 MB. Se recomienda JPG, PNG o WebP.",
+  "Preparing your pattern…": "Preparando tu patrón…",
+  "Please choose an image from your gallery.":
+    "Elige una imagen de tu galería.",
+  "Choose an image smaller than 15 MB.": "Elige una imagen de menos de 15 MB.",
+  "Could not open this image. Try a JPG, PNG or WebP file.":
+    "No se pudo abrir esta imagen. Prueba con un archivo JPG, PNG o WebP.",
   "Digital camera": "Cámara digital",
   "Star 2": "Estrella 2",
   "Star 3": "Estrella 3",

@@ -21,6 +21,7 @@ const initialState: PhotoboothState = {
   currentStep: AppStep.Welcome,
   photoCount: null,
   stripBg: null,
+  customPattern: null,
   activeStyleTab: "patterns",
   filter: PhotoFilter.Normal,
   capturedPhotos: [],
@@ -84,6 +85,14 @@ export const usePhotoboothStore = create<PhotoboothStore>()(
 
       setStripBg: (bg) => {
         set({ stripBg: bg }, false, "setStripBg");
+      },
+
+      setCustomPattern: (pattern) => {
+        set(
+          { customPattern: pattern, stripBg: pattern },
+          false,
+          "setCustomPattern",
+        );
       },
 
       setActiveStyleTab: (tab) => {

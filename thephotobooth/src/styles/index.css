@@ -1052,3 +1052,31 @@ select {
   transform: scaleX(-1);
   pointer-events: none;
 }
+.custom-pattern-picker {
+  width: min(620px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 22px;
+  border: 2px solid var(--pink);
+  border-radius: 26px;
+}
+.custom-pattern-upload { position: relative; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.custom-pattern-upload:focus-within { outline: 3px solid black; outline-offset: 3px; }
+.custom-pattern-note { font-family: system-ui, sans-serif; font-size: 13px; text-align: center; color: #80566d; }
+.custom-pattern-card {
+  position: relative;
+  width: min(260px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px;
+  border: 2px solid var(--pink);
+  border-radius: 18px;
+  background: white;
+  color: var(--pink);
+  font-size: 12px;
+}
+.custom-pattern-card[aria-pressed="true"] { box-shadow: 0 0 0 4px #ff0da226; }
+.custom-pattern-preview { width: 100%; aspect-ratio: 1; background-color: #fff5fb; background-repeat: repeat; border-radius: 8px; }

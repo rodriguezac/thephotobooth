@@ -7,6 +7,7 @@ import { SOLID_OPTIONS } from "./constants";
 const drawImage = vi.fn();
 const context = {
   drawImage,
+  createPattern: vi.fn<CanvasRenderingContext2D["createPattern"]>(() => ({ setTransform: vi.fn() })),
   getImageData: vi.fn(() => ({
     data: new Uint8ClampedArray([100, 100, 100, 255]),
   })),
@@ -29,6 +30,7 @@ const context = {
 const canvases: HTMLCanvasElement[] = [];
 beforeEach(() => {
   drawImage.mockReset();
+  context.createPattern.mockClear();
   context.getImageData.mockClear();
   context.putImageData.mockClear();
   context.save.mockClear();
@@ -67,6 +69,26 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe("strip export", () => {
+  it("repeats a gallery pattern without stretching it in the downloadable strip", async () => {
+    await generateStrip(
+      [{ dataUrl: "photo", takenAt: 1 }],
+      {
+        type: "custom",
+        id: "gallery",
+        label: "Your image",
+        name: "test.png",
+        src: "data:image/png;base64,pattern",
+        width: 1200,
+        height: 900,
+      },
+      PhotoFilter.Normal,
+    );
+    const tile = context.createPattern.mock.calls[0][0] as HTMLCanvasElement;
+    expect(tile.width).toBe(240);
+    expect(tile.height).toBe(180);
+    expect(context.createPattern).toHaveBeenCalledWith(tile, "repeat");
+    expect(drawImage.mock.calls[0].slice(1)).toEqual([0, 0, 240, 180]);
+  });
   it("applies art effects inside photo bounds and keeps frame and stickers outside the pixel effect", async () => {
     await generateStrip(
       [{ dataUrl: "photo", takenAt: 1 }],

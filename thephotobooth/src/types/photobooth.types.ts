@@ -54,13 +54,23 @@ export interface SolidStyle {
   label: string;
 }
 
+export interface CustomPattern {
+  type: "custom";
+  id: string;
+  src: string;
+  label: string;
+  name: string;
+  width: number;
+  height: number;
+}
+
 /** Unión discriminada del fondo del strip */
-export type StripBackground = PatternStyle | SolidStyle;
+export type StripBackground = PatternStyle | SolidStyle | CustomPattern;
 
 // ------------------------------------------------------------
 // Pestaña de selección de estilo
 // ------------------------------------------------------------
-export type StyleTab = "patterns" | "solids";
+export type StyleTab = "patterns" | "solids" | "custom";
 
 // ------------------------------------------------------------
 // Filtros fotográficos
@@ -131,6 +141,7 @@ export interface PhotoboothState {
 
   /** Fondo del strip seleccionado */
   stripBg: StripBackground | null;
+  customPattern: CustomPattern | null;
 
   /** Pestaña activa en la pantalla de estilo */
   activeStyleTab: StyleTab;
@@ -174,6 +185,7 @@ export interface PhotoboothActions {
 
   /** Selecciona el fondo del strip */
   setStripBg: (bg: StripBackground) => void;
+  setCustomPattern: (pattern: CustomPattern) => void;
 
   /** Cambia la pestaña activa en selección de estilo */
   setActiveStyleTab: (tab: StyleTab) => void;

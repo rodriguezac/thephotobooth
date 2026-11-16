@@ -45,11 +45,18 @@ export async function generateStrip(
     const image = await loadImage(background.src);
     // Scale tiles to a consistent physical size regardless of source dimensions.
     const tile = document.createElement("canvas");
-    tile.width = 240;
-    tile.height = 240;
+    const longest = Math.max(image.width, image.height);
+    tile.width =
+      background.type === "custom"
+        ? Math.max(1, Math.round((240 * image.width) / longest))
+        : 240;
+    tile.height =
+      background.type === "custom"
+        ? Math.max(1, Math.round((240 * image.height) / longest))
+        : 240;
     const tileCtx = tile.getContext("2d");
     if (!tileCtx) throw new Error("Could not create the pattern.");
-    tileCtx.drawImage(image, 0, 0, 240, 240);
+    tileCtx.drawImage(image, 0, 0, tile.width, tile.height);
     const pattern = ctx.createPattern(tile, "repeat");
     if (!pattern) throw new Error("Could not create the pattern.");
     ctx.fillStyle = pattern;

@@ -29,6 +29,10 @@ Las fotos se procesan en el navegador y no se envían automáticamente a un serv
 
 La previsualización final y la descarga usan el mismo PNG generado con Canvas 2D, evitando diferencias de encuadre, filtro o distribución. Los tests cubren el ciclo de vida de cámara, permisos tardíos, reintentos, captura sin dimensiones y exportación de 1-4 fotos.
 
+## Patrón desde la galería
+
+En el paso de estilo, selecciona `Your image` / `Tu imagen` y elige una imagen de la galería (hasta 15 MB). Se prepara localmente, conserva sus proporciones y se repite como patrón en la tira. Puedes cambiarla, alternar con los patrones y colores del catálogo y volver a seleccionarla sin perderla durante la sesión. Se mantiene con `Repeat` y se incluye en el PNG descargado; `Main Menu` o recargar la página la descarta. No se envía al servidor.
+
 ## QR (fuera de la primera versión)
 
 El componente `ShareQr` y sus pruebas se conservan para una versión futura, pero no se montan en la pantalla de resultado. El build de producción no incluye el código de carga a Cloudinary. No configures variables de Cloudinary para esta versión.
