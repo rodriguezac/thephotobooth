@@ -1,62 +1,109 @@
-# The Photobooth
+# The Photobooth · documentación técnica
 
-Photobooth local con React, TypeScript y Vite. El flujo permite elegir 1-4 fotos, un patrón o color sólido, un filtro en vivo y capturar una secuencia con cuenta regresiva. El resultado se genera como PNG con todas las fotos, el fondo y el filtro elegidos. Cuatro fotos usan una cuadrícula de 2 × 2; las demás se apilan verticalmente.
+Consulta el [README principal](../README.md) para ver las funciones, el uso de la aplicación y las instrucciones completas de instalación.
 
-## Desarrollo
+**Producción:** [thephotobooth-raspaorojo.netlify.app](https://thephotobooth-raspaorojo.netlify.app/)
+
+## Comandos
+
+Ejecuta estos comandos dentro de esta carpeta, con Node.js 22 recomendado:
 
 ```sh
-npm install
+npm ci
 npm run dev
-```
-
-Abre la URL que muestra Vite (normalmente http://localhost:5173/).
-
-```sh
-npm run build
 npm run lint
 npm test
+npm run build
+npm run preview
 ```
+
+No se necesitan variables de entorno para la primera versión. `npm run build` ejecuta TypeScript y Vite; `npm test` ejecuta Vitest.
+
+## Estructura
+
+- `src/App.tsx`: navegación por pasos y desplazamiento al cambiar de pantalla.
+- `src/store/usePhotoboothStore.ts`: estado de la sesión, fotos, cámara elegida, estilo y stickers.
+- `src/components/steps/`: inicio, cantidad de fotos, estilo, filtro, captura, stickers y resultado.
+- `src/hooks/useCamera.ts`: permisos, ciclo de vida del video, cambio de cámara y captura.
+- `src/utils/cameraDevices.ts`: detección de cámara trasera a partir de los dispositivos y sus metadatos.
+- `src/hooks/useStripPreview.ts`: generación de vistas previas y descarte de resultados antiguos.
+- `src/utils/stripLayout.ts`: medidas y distribución de 1 a 4 fotos.
+- `src/utils/canvasUtils.ts`: composición del PNG con fondo, fotos, filtros, crédito y stickers.
+- `src/utils/photoEffects.ts` y `src/components/ui/ArtFilterPreview.tsx`: efectos compartidos entre el video en vivo y la exportación.
+- `src/hooks/useStickerGestures.ts` y `src/utils/stickerGestures.ts`: arrastre y gestos de dos dedos.
+- `src/components/ui/DownloadStrip.tsx`: descarga Blob, menú nativo, alternativa de guardado y avisos.
+- `src/components/ui/StripCreditLink.tsx` y `src/utils/branding.ts`: enlaces de los créditos de la tira y destino de Instagram.
+- `src/i18n/`: selección de idioma, persistencia local y traducciones al español.
+- `src/styles/index.css`: diseño, tamaños adaptables y controles táctiles.
+- `public/`: cámara, fondos, patrones, stickers, filtros y fuentes.
 
 ## Cámara
 
-La cámara requiere localhost o HTTPS. Permite el acceso en el navegador y, en macOS, en Ajustes del Sistema → Privacidad y seguridad → Cámara. Si está ocupada, cierra otras apps que la usen y pulsa `retry camera`.
+El video se coloca dentro de la pantalla de `public/camera/camera.png`, conservando un encuadre de 4:3. La captura usa el mismo recorte central, sin estirar la imagen. La cámara frontal se refleja tanto en la vista previa como en la captura; la trasera conserva la orientación normal.
 
-La vista previa usa el video por encima de la pantalla opaca de la imagen de cámara. Las solicitudes de permisos que se resuelven después de salir se descartan y sus tracks se detienen. La cámara se libera al salir de la pantalla; solo se puede capturar cuando hay video disponible.
+Después de obtener permiso, se consultan los dispositivos disponibles. Se usan sus capacidades, etiquetas o los datos de la cámara activa para identificar una trasera. Tener varias webcams no basta. Si no se identifica una trasera, la opción no se muestra. Los cambios de dispositivos actualizan la disponibilidad.
 
-## Fotos y exportación
+Cambiar de cámara detiene la anterior antes de solicitar la nueva. Si la trasera ya no está disponible, se oculta y se vuelve a la frontal. El selector se bloquea durante la secuencia de captura. Las respuestas de permisos antiguas se descartan y sus tracks se detienen; la cámara también se libera al salir de la pantalla.
 
-Las fotos se procesan en el navegador y no se envían automáticamente a un servidor. El QR está oculto y deshabilitado en la primera versión; no se suben fotos a Cloudinary. Se conservan originales en memoria para poder personalizar fondo y filtro después de capturar. `CUSTOMIZE` permite volver al estilo y guardar directamente o seguir al filtro; `REPEAT` vuelve a tomar las fotos con la misma cantidad, fondo, filtro y stickers. `MAIN MENU` reinicia la sesión desde la pantalla START. Al cambiar la cantidad se eliminan las capturas anteriores. Recargar la página también reinicia la sesión.
+## Sesión y personalización
 
-La previsualización final y la descarga usan el mismo PNG generado con Canvas 2D, evitando diferencias de encuadre, filtro o distribución. Los tests cubren el ciclo de vida de cámara, permisos tardíos, reintentos, captura sin dimensiones y exportación de 1-4 fotos.
+Las capturas originales se conservan en memoria para volver a aplicar filtros sin acumular efectos. Personalizar fotos existentes muestra la tira y no solicita una cámara nueva.
 
-El selector `Front camera` / `Back camera` aparece antes de capturar. La opción trasera se muestra únicamente cuando los dispositivos disponibles, sus capacidades o sus etiquetas identifican una cámara trasera después de conceder permiso; tener dos webcams no basta. Si el navegador no expone esa información, la opción permanece oculta. La lista se actualiza al cambiar los dispositivos. La elección se conserva entre filtro, captura y `Repeat`. Cambiarla libera la cámara anterior antes de solicitar la nueva; la cámara trasera se solicita de forma explícita y, si deja de estar disponible, se oculta y se vuelve automáticamente a la frontal. Solo la frontal usa efecto espejo en vista previa y captura. El selector se bloquea mientras se toma la secuencia.
+`Repeat` conserva cantidad, fondo, filtro, stickers y elección de cámara, y elimina las capturas anteriores para repetir la secuencia. `Main Menu` reinicia la sesión. Cambiar la cantidad elimina las fotos y los stickers; recargar también pierde la sesión. El idioma se mantiene por separado en almacenamiento local.
 
-## Guardado en dispositivos móviles
+En el editor, un dedo mueve el sticker y dos dedos permiten cambiar tamaño, rotación y posición. Al levantar un dedo, el arrastre continúa sin saltar de posición. Los controles manuales permiten tamaño en porcentaje, giro en pasos de 15°, rotación precisa, volteo horizontal/vertical, restablecimiento, duplicado y borrado. Las flechas del teclado mueven el sticker; Shift aumenta el paso y Delete/Backspace lo elimina.
 
-La descarga de escritorio usa un Blob con nombre PNG. En Android, `Download` abre el menú nativo para elegir una app de fotos cuando admite compartir archivos. La web no puede forzar la escritura directa en Galería: los destinos disponibles dependen del teléfono y de las apps instaladas. Se conserva `Download file` como descarga normal a Archivos/Descargas. Si no se admite compartir archivos, se ofrece la imagen local para guardarla manualmente. En dispositivos Apple táctiles se prepara el archivo antes del toque y se invoca el menú nativo de guardado cuando `navigator.canShare({ files })` lo admite. Si esa opción falla o no existe, se muestra la tira para mantenerla presionada y guardarla, junto a un enlace para abrir la imagen. Cancelar el menú no se trata como error. El mensaje de escritorio confirma el inicio de la descarga, ya que el navegador no informa de su escritura final al disco; el menú nativo confirma la acción de guardar o compartir cuando se completa.
+## Catálogos y archivos
 
-Referencia de activación del usuario en WebKit: https://webkit.org/blog/13862/the-user-activation-api/
+Las definiciones son explícitas; copiar una imagen a `public/` no actualiza por sí solo el selector.
 
-El fondo del inicio cubre el viewport dinámico, con un fondo fijo para evitar espacios blancos al cambiar de orientación o al cambiar la altura de las barras del navegador. Todos los créditos `@raspaorojo` de la web abren Instagram en otra pestaña, incluidos los de las vistas de la tira, personalización, stickers, vista ampliada y guardado alternativo. Los créditos dentro de las imágenes se enlazan mediante una zona interactiva sobre la vista web; el PNG descargado conserva el texto, pero no admite enlaces interactivos.
+- Patrones y colores: `src/utils/constants.ts`. El catálogo actual usa los archivos numerados del 1 al 27 en `public/patrones/` y 20 colores sólidos.
+- Filtros: el mismo archivo define Normal, 2016, Sepia, B&W, Vintage, Cool, Sepia Film, Rose Pop, Pink Ink y Blue Moon. Los efectos de píxeles se implementan en `src/utils/photoEffects.ts`.
+- Stickers: `src/utils/stickers.ts`, con 70 PNG y paginación de 12 por página. El abecedario A–Z está seguido de `AND.png` y `exclamation.png`. La letra S usa el nombre `S.PNG`; respeta la capitalización exacta para el deploy en Linux.
+- Idiomas: el texto base está en inglés y su traducción está en `src/i18n/es.ts`. Agrega ambas versiones cuando incorpores texto a la interfaz.
 
-## Patrón desde la galería
+Los filtros se aplican a las fotos, no al fondo ni a los stickers. Los efectos 2016 y los filtros de píxeles se usan tanto en la cámara como en el PNG.
 
-En el paso de estilo, selecciona `Your image` / `Tu imagen` y elige una imagen de la galería (hasta 15 MB). Se prepara localmente, conserva sus proporciones y se repite como patrón en la tira. Puedes cambiarla, alternar con los patrones y colores del catálogo y volver a seleccionarla sin perderla durante la sesión. Se mantiene con `Repeat` y se incluye en el PNG descargado; `Main Menu` o recargar la página la descarta. No se envía al servidor.
+## Patrones de la galería
 
-## QR (fuera de la primera versión)
+`src/utils/customPattern.ts` valida el archivo, limita su tamaño a 15 MB y lo prepara localmente como PNG. Conserva las proporciones y limita el lado mayor a 1536 píxeles. El exportador repite la imagen como patrón sin estirarla.
 
-El componente `ShareQr` y sus pruebas se conservan para una versión futura, pero no se montan en la pantalla de resultado. El build de producción no incluye el código de carga a Cloudinary. No configures variables de Cloudinary para esta versión.
+`CustomPatternPicker` conserva el último patrón válido si falla un reemplazo y descarta cargas que terminan después de salir de la categoría. La imagen se mantiene durante la sesión y se elimina al reiniciarla; no se sube al servidor.
 
-## Deploy en Netlify
+## Exportación y guardado
 
-El repositorio contiene `netlify.toml` en la raíz: usa `thephotobooth` como carpeta base, Node 22, `npm run build` y publica `dist`. No subas `.env.local`, `work` ni `node_modules`.
+`generateStrip` compone el fondo, las fotos y el crédito; después dibuja los stickers con sus posiciones normalizadas, tamaño, rotación y volteos. La vista final y la descarga usan el mismo PNG. `useStripPreview` descarta generaciones antiguas para evitar mostrar un fondo o filtro anterior.
 
-Producción: https://thephotobooth-raspaorojo.netlify.app/
+El archivo se prepara antes de pulsar Descargar para conservar la activación del usuario necesaria en el menú nativo:
 
-Al conectar el proyecto de Netlify a `rodriguezac/thephotobooth` con `main` como rama de producción, cada push a `main` inicia un build y publica el resultado si termina correctamente. Los cambios locales necesitan commit y push para publicarse.
+- En escritorio, un enlace Blob inicia la descarga PNG.
+- En iPhone/iPad y Android, se usa `navigator.canShare({ files })` y `navigator.share()` cuando se admiten archivos.
+- Android conserva además la descarga normal `Download file`. Las apps de destino dependen del dispositivo; la web no puede garantizar el guardado directo en Galería.
+- Si el menú nativo no está disponible o falla, se muestra la imagen para guardarla manualmente o abrirla en otra pestaña. Cancelar el menú no se trata como error.
+- El aviso de descarga confirma su inicio. La web no puede confirmar la escritura final al disco; el aviso del menú nativo indica que terminó la acción de guardar o compartir.
 
-## Stickers in Customize
+Los créditos de las vistas web tienen un enlace superpuesto al crédito impreso. El PNG descargado conserva el texto y no contiene enlaces interactivos.
 
-After choosing a style and filter, `Next` opens the sticker editor with the PNG files from `public/stickers/`. Drag a sticker from the gallery onto the strip, or tap to add it. Use one finger to move the selected sticker and two fingers to pinch, rotate and move it together. When one finger is lifted, dragging continues without a position jump. Tap `Done` to deselect the sticker and scroll the strip normally.
+Referencias: [activación del usuario en WebKit](https://webkit.org/blog/13862/the-user-activation-api/) y [Web Share API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Share_API).
 
-Manual tools include size and rotation sliders, 15-degree rotation buttons, horizontal and vertical flips, orientation reset, and removal. Arrow keys move a focused sticker (Shift moves faster); Delete removes it. Position, size, rotation and flips are preserved in the downloaded PNG and when navigating back through Customize. `Repeat` retakes the photos with the same count, background, filter and sticker composition. `Main Menu` returns to the welcome screen and resets the session; selecting a new photo count also starts a new composition. The paginated catalog is defined in `src/utils/stickers.ts`.
+## QR deshabilitado
+
+`ShareQr` y sus pruebas se conservan para una versión futura, pero el componente no se monta en el resultado. La primera versión no muestra el QR y su compilación excluye el código de carga a Cloudinary. No configures Cloudinary para activar esta versión: cambiar variables de entorno no vuelve a montar el componente.
+
+Nunca guardes secretos en variables `VITE_`: los valores usados por el frontend pueden formar parte de la compilación pública. `.env.local` permanece fuera de Git.
+
+## Netlify y validación
+
+La configuración está en [`../netlify.toml`](../netlify.toml):
+
+- Rama de producción configurada en Netlify: `main`.
+- Carpeta base: `thephotobooth`.
+- Node: `22`.
+- Comando de compilación: `npm run build`.
+- Carpeta publicada, relativa a la base: `dist`.
+
+Cada push a `main` inicia un deploy. El sitio se actualiza cuando la compilación termina correctamente. `lint` y las pruebas se ejecutan localmente; el comando actual de Netlify ejecuta la compilación, no esos dos controles por separado.
+
+Antes de publicar, ejecuta `npm run lint`, `npm test` y `npm run build`. Las pruebas cubren cámara y permisos tardíos, disponibilidad de la trasera, captura con y sin efecto espejo, composición del PNG, filtros, personalización, gestos de stickers, imágenes de galería, idiomas y guardado por dispositivo. Los menús nativos y las apps de destino requieren también comprobación en dispositivos reales.
+
+`node_modules/`, `dist/`, `.env.local` y `work/` están excluidos de Git. Usa `work/` para fixtures y artefactos de revisión; no los incluyas en el deploy.
