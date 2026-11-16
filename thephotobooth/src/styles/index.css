@@ -75,10 +75,12 @@ select {
   font-size: 16px;
 }
 .app {
-  min-height: 100svh;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 .screen {
-  min-height: 100svh;
+  min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -172,14 +174,42 @@ select {
   padding-top: 18px;
 }
 .welcome {
-  min-height: 100svh;
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
+  padding: 48px 0 56px;
+}
+.welcome::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background: #fff url("/background/polkadots-1.webp") center/cover;
+}
+.watermark a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; color: inherit; text-decoration: none; }
+.watermark a:hover { text-decoration: underline; }
+.welcome .watermark {
+  position: absolute;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+}
+.welcome .watermark a {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: white;
 }
 .paper-note {
   position: relative;
   width: min(610px, 85vw);
+  width: min(610px, 85vw, calc(100dvh - 112px));
   aspect-ratio: 1;
   display: grid;
   place-items: center;
@@ -421,7 +451,7 @@ select {
 .result-layout {
   width: min(950px, 100%);
   display: grid;
-  grid-template-columns: 1fr 180px;
+  grid-template-columns: minmax(0, 1fr) 180px;
   gap: 80px;
   align-items: center;
   margin: 16px 0 24px;
@@ -573,9 +603,6 @@ select {
   .paper-copy .pill {
     font-size: 16px;
     min-height: 44px;
-  }
-  .welcome {
-    background-size: auto 100%;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1080,3 +1107,12 @@ select {
 }
 .custom-pattern-card[aria-pressed="true"] { box-shadow: 0 0 0 4px #ff0da226; }
 .custom-pattern-preview { width: 100%; aspect-ratio: 1; background-color: #fff5fb; background-repeat: repeat; border-radius: 8px; }
+
+.save-photo-hint { font: 13px/1.5 system-ui, sans-serif; color: #80566d; text-align: center; }
+.save-photo-card { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+.save-photo-preview { display: block; width: 100%; height: auto; -webkit-touch-callout: default; user-select: auto; }
+
+@media (pointer: coarse) {
+  .pill, .step-navigation .pill, .text-button, .pill-select { min-height: 44px; }
+  .page-arrow { width: 44px; height: 44px; }
+}

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { usePhotoboothStore } from "../../../store/usePhotoboothStore";
 import { AppStep } from "../../../types/photobooth.types";
 import { useStripPreview } from "../../../hooks/useStripPreview";
+import { DownloadStrip } from "../../ui/DownloadStrip";
 import { Watermark } from "../../ui/Watermark";
 export function ResultScreen() {
   const t = useTranslation();
@@ -118,18 +119,7 @@ export function ResultScreen() {
           </div>
         </div>
         <div className="result-actions">
-          <a
-            className={`pill ${url ? "" : "disabled"}`}
-            id="btn-download"
-            href={url ?? undefined}
-            download="the-photobooth.png"
-            aria-disabled={!url}
-            onClick={(e) => {
-              if (!url) e.preventDefault();
-            }}
-          >
-            {t("DOWNLOAD")}
-          </a>
+          <DownloadStrip imageUrl={url} />
           <button
             className="pill outline"
             id="btn-repeat"

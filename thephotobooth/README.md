@@ -29,6 +29,14 @@ Las fotos se procesan en el navegador y no se envían automáticamente a un serv
 
 La previsualización final y la descarga usan el mismo PNG generado con Canvas 2D, evitando diferencias de encuadre, filtro o distribución. Los tests cubren el ciclo de vida de cámara, permisos tardíos, reintentos, captura sin dimensiones y exportación de 1-4 fotos.
 
+## Guardado en iPhone y iPad
+
+La descarga de escritorio usa un Blob con nombre PNG. En dispositivos Apple táctiles se prepara el archivo antes del toque y se invoca el menú nativo de guardado cuando `navigator.canShare({ files })` lo admite. Si esa opción falla o no existe, se muestra la tira para mantenerla presionada y guardarla, junto a un enlace para abrir la imagen. Cancelar el menú no se trata como error.
+
+Referencia de activación del usuario en WebKit: https://webkit.org/blog/13862/the-user-activation-api/
+
+El fondo del inicio cubre el viewport dinámico, con un fondo fijo para evitar espacios blancos al cambiar de orientación o al cambiar la altura de las barras del navegador. El enlace `@raspaorojo` abre Instagram en otra pestaña.
+
 ## Patrón desde la galería
 
 En el paso de estilo, selecciona `Your image` / `Tu imagen` y elige una imagen de la galería (hasta 15 MB). Se prepara localmente, conserva sus proporciones y se repite como patrón en la tira. Puedes cambiarla, alternar con los patrones y colores del catálogo y volver a seleccionarla sin perderla durante la sesión. Se mantiene con `Repeat` y se incluye en el PNG descargado; `Main Menu` o recargar la página la descarta. No se envía al servidor.

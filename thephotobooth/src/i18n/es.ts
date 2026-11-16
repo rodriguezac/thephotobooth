@@ -1,4 +1,11 @@
 export const es: Record<string, string> = {
+  "Opening save options…": "Abriendo opciones para guardar…",
+  "Choose Save Image or Save to Files in the save menu.":
+    "Elige Guardar imagen o Guardar en Archivos en el menú para guardar.",
+  "Touch and hold the image below to save it, or open it in a new tab.":
+    "Mantén presionada la imagen de abajo para guardarla o ábrela en una pestaña nueva.",
+  "Your photo strip, ready to save": "Tu tira de fotos, lista para guardar",
+  "Open image ↗": "Abrir imagen ↗",
   "your image": "tu imagen",
   "Your image": "Tu imagen",
   "Upload image": "Subir imagen",

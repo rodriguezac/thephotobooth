@@ -3,6 +3,7 @@ import {
   useTranslation,
   type Language,
 } from "../../../i18n/useLanguage";
+import { Watermark } from "../../ui/Watermark";
 import { usePhotoboothStore } from "../../../store/usePhotoboothStore";
 import { AppStep } from "../../../types/photobooth.types";
 export function WelcomeScreen() {
@@ -52,6 +53,7 @@ export function WelcomeScreen() {
           </button>
         </div>
       </div>
+      <Watermark />
     </section>
   );
 }
