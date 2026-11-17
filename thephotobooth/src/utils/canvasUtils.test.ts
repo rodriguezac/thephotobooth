@@ -19,7 +19,8 @@ const context = {
   restore: vi.fn(),
   fillRect: vi.fn(),
   fillText: vi.fn(),
-  filter: "none",
+  get filter() { return "none"; },
+  set filter(_value: string) { throw new Error("Native canvas filters unavailable"); },
   globalAlpha: 1,
   globalCompositeOperation: "source-over",
   fillStyle: "",
@@ -232,21 +233,21 @@ describe("strip export", () => {
       }
     },
   );
-  it("applies the selected filter to every photo, then resets it for the branding", async () => {
-    const filters: string[] = [];
-    drawImage.mockImplementation(() => filters.push(context.filter));
-    await generateStrip(
-      [
-        { dataUrl: "photo", takenAt: 1 },
-        { dataUrl: "photo", takenAt: 2 },
-      ],
-      SOLID_OPTIONS[0],
-      PhotoFilter.BW,
-    );
-    expect(filters).toEqual([
-      "grayscale(100%) contrast(1.15)",
-      "grayscale(100%) contrast(1.15)",
-    ]);
-    expect(context.filter).toBe("none");
-  });
+  it.each([PhotoFilter.Sepia, PhotoFilter.BW, PhotoFilter.Vintage, PhotoFilter.Cool, PhotoFilter.Year2016])(
+    "exports %s without native Canvas filters and only processes the photos",
+    async (filter) => {
+      const nativeFilter = vi.spyOn(context, "filter", "set");
+      await generateStrip(
+        [{ dataUrl: "photo", takenAt: 1 }, { dataUrl: "photo", takenAt: 2 }],
+        SOLID_OPTIONS[0],
+        filter,
+      );
+      expect(nativeFilter).not.toHaveBeenCalled();
+      expect(context.getImageData.mock.calls).toEqual([
+        [28, 28, 600, 450], [28, 494, 600, 450],
+      ]);
+      expect(context.putImageData).toHaveBeenCalledTimes(2);
+      expect(context.fillText).toHaveBeenCalled();
+    },
+  );
 });

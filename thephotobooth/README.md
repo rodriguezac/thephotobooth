@@ -57,12 +57,12 @@ En el editor, un dedo mueve el sticker y dos dedos permiten cambiar tamaño, rot
 
 Las definiciones son explícitas; copiar una imagen a `public/` no actualiza por sí solo el selector.
 
-- Patrones y colores: `src/utils/constants.ts`. El catálogo actual usa los archivos numerados del 1 al 27 en `public/patrones/` y 20 colores sólidos.
+- Patrones y colores: `src/utils/constants.ts`. El catálogo actual usa los archivos numerados del 1 al 27 en `public/patrones/` en formato WebP sin pérdida y 20 colores sólidos.
 - Filtros: el mismo archivo define Normal, 2016, Sepia, B&W, Vintage, Cool, Sepia Film, Rose Pop, Pink Ink y Blue Moon. Los efectos de píxeles se implementan en `src/utils/photoEffects.ts`.
-- Stickers: `src/utils/stickers.ts`, con 70 PNG y paginación de 12 por página. El abecedario A–Z está seguido de `AND.png` y `exclamation.png`. La letra S usa el nombre `S.PNG`; respeta la capitalización exacta para el deploy en Linux.
+- Stickers: `src/utils/stickers.ts`, con 70 WebP sin pérdida y paginación de 12 por página. El abecedario A–Z está seguido de `AND.webp` y `exclamation.webp`. Respeta la capitalización exacta de los nombres para el deploy en Linux.
 - Idiomas: el texto base está en inglés y su traducción está en `src/i18n/es.ts`. Agrega ambas versiones cuando incorpores texto a la interfaz.
 
-Los filtros se aplican a las fotos, no al fondo ni a los stickers. Los efectos 2016 y los filtros de píxeles se usan tanto en la cámara como en el PNG.
+Los filtros se aplican a las fotos, no al fondo ni a los stickers. La exportación aplica las operaciones de color a los píxeles mediante `src/utils/colorFilters.ts`, sin depender de `CanvasRenderingContext2D.filter`, para funcionar también en navegadores que no lo implementan. Los efectos 2016 y los filtros de píxeles se usan tanto en la cámara como en el PNG.
 
 ## Patrones de la galería
 

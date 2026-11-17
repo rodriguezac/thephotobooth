@@ -1,4 +1,5 @@
 import { applyPhotoEffect, hasPixelEffect } from "./photoEffects";
+import { applyColorFilter } from "./colorFilters";
 import { getStripLayout } from "./stripLayout";
 import type {
   CapturedPhoto,
@@ -72,7 +73,6 @@ export async function generateStrip(
     const sh = (sw * 3) / 4;
     const x = padding + (i % columns) * (photoWidth + gap);
     const y = padding + Math.floor(i / columns) * (photoHeight + gap);
-    ctx.filter = cssFilter;
     ctx.drawImage(
       img,
       (img.width - sw) / 2,
@@ -84,13 +84,13 @@ export async function generateStrip(
       photoWidth,
       photoHeight,
     );
-    if (hasPixelEffect(filter)) {
+    if (cssFilter !== "none" || hasPixelEffect(filter)) {
       const pixels = ctx.getImageData(x, y, photoWidth, photoHeight);
+      applyColorFilter(pixels.data, cssFilter);
       applyPhotoEffect(pixels.data, photoWidth, photoHeight, filter);
       ctx.putImageData(pixels, x, y);
     }
     if (overlay && overlayImage) {
-      ctx.filter = "none";
       ctx.globalCompositeOperation = overlay.blendMode;
       ctx.globalAlpha = overlay.opacity;
       ctx.drawImage(overlayImage, x, y, photoWidth, photoHeight);
@@ -98,7 +98,6 @@ export async function generateStrip(
       ctx.globalAlpha = 1;
     }
   }
-  ctx.filter = "none";
   ctx.fillStyle = "#fff";
   ctx.fillRect(padding, height - footer + 12, width - padding * 2, 54);
   ctx.fillStyle = "#ff0da2";

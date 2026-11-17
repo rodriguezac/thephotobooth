@@ -32,7 +32,7 @@ export const PATTERN_OPTIONS: PatternStyle[] = Array.from(
 ).map((id) => ({
   type: "pattern",
   id,
-  src: `/patrones/${id}.png`,
+  src: `/patrones/${id}.webp`,
   label: `Pattern ${id}`,
 }));
 

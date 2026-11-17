@@ -37,7 +37,7 @@ export interface PatternStyle {
   type: "pattern";
   /** ID del archivo de patrón */
   id: number;
-  /** Ruta pública a la imagen, p.ej. "/patrones/1.png" */
+  /** Ruta pública a la imagen, p.ej. "/patrones/1.webp" */
   src: string;
   label: string;
 }
