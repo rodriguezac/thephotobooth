@@ -8,6 +8,7 @@ import type {
   StickerAsset,
 } from "../../../types/photobooth.types";
 import { AppStep } from "../../../types/photobooth.types";
+import { useSwipePagination } from "../../../hooks/useSwipePagination";
 import { useStickerGestures } from "../../../hooks/useStickerGestures";
 import { normalizeRotation } from "../../../utils/stickerGestures";
 import { useStripPreview } from "../../../hooks/useStripPreview";
@@ -61,6 +62,9 @@ export function StickerScreen() {
       ? `clamp(8px, calc(${(selected.y + halfHeight) * 100}% + 12px), calc(100% - 56px))`
       : `clamp(8px, calc(${((selected?.y ?? 0) - halfHeight) * 100}% - 56px), calc(100% - 56px))`;
   const pageCount = Math.ceil(STICKER_OPTIONS.length / PAGE_SIZE);
+  const swipePages = useSwipePagination((direction) =>
+    setPage((current) => Math.max(0, Math.min(pageCount - 1, current + direction))),
+  );
   useEffect(() => {
     mounted.current = true;
     return () => {
@@ -291,7 +295,7 @@ export function StickerScreen() {
           )}
         </div>
         <aside className="sticker-tools" aria-label={t("Sticker collection")}>
-          <div className="sticker-palette">
+          <div className="sticker-palette swipe-pages" {...swipePages}>
             {STICKER_OPTIONS.slice(
               page * PAGE_SIZE,
               (page + 1) * PAGE_SIZE,
@@ -313,7 +317,7 @@ export function StickerScreen() {
               </button>
             ))}
           </div>
-          <nav className="style-pagination" aria-label={t("Sticker pages")}>
+          <nav className="style-pagination swipe-pages" aria-label={t("Sticker pages")} {...swipePages}>
             <button
               className="page-arrow"
               aria-label={t("Previous stickers page")}

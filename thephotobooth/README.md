@@ -64,6 +64,12 @@ Las definiciones son explícitas; copiar una imagen a `public/` no actualiza por
 
 Los filtros se aplican a las fotos, no al fondo ni a los stickers. La exportación aplica las operaciones de color a los píxeles mediante `src/utils/colorFilters.ts`, sin depender de `CanvasRenderingContext2D.filter`, para funcionar también en navegadores que no lo implementan. Los efectos 2016 y los filtros de píxeles se usan tanto en la cámara como en el PNG.
 
+## Paginación táctil
+
+`src/hooks/useSwipePagination.ts` permite cambiar de página deslizando un dedo sobre los catálogos de patrones, colores y stickers o sus controles de paginación. Hacia la izquierda avanza y hacia la derecha retrocede; las flechas siguen disponibles y se respetan los límites de cada catálogo.
+
+Se requiere un movimiento predominantemente horizontal de al menos 48 píxeles. Los desplazamientos verticales, gestos de varios dedos y gestos cancelados no cambian de página. `touch-action: pan-y pinch-zoom` conserva el scroll vertical y el zoom del navegador. Después de deslizar, se suprime el clic sintético para evitar seleccionar un patrón o agregar un sticker accidentalmente. El gesto no se aplica al editor de la tira, que conserva sus propios controles de arrastre, tamaño y rotación.
+
 ## Patrones de la galería
 
 `src/utils/customPattern.ts` valida el archivo, limita su tamaño a 15 MB y lo prepara localmente como PNG. Conserva las proporciones y limita el lado mayor a 1536 píxeles. El exportador repite la imagen como patrón sin estirarla.

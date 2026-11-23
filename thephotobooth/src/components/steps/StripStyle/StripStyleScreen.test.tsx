@@ -20,6 +20,31 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("style pagination", () => {
+  it("swipes through patterns and solids within their bounds without selecting tiles or changing steps", () => {
+    render(<StripStyleScreen />);
+    const swipe = (left = true) => {
+      const grid = screen.getByRole("group", { name: /options$/ });
+      const start = { identifier: 1, clientX: left ? 240 : 70, clientY: 100 };
+      const end = { ...start, clientX: left ? 70 : 240 };
+      fireEvent.touchStart(grid, { touches: [start] });
+      fireEvent.touchMove(grid, { touches: [end] });
+      fireEvent.touchEnd(grid, { touches: [], changedTouches: [end] });
+    };
+    swipe(false);
+    expect(screen.getByLabelText("Page 1 of 3")).toBeTruthy();
+    swipe(); swipe(); swipe();
+    expect(screen.getByLabelText("Page 3 of 3")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Pattern 21" }));
+    expect(usePhotoboothStore.getState().stripBg).toBeNull();
+    swipe(false);
+    expect(screen.getByLabelText("Page 2 of 3")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("Style category"), { target: { value: "solids" } });
+    swipe(); swipe();
+    expect(screen.getByLabelText("Page 2 of 2")).toBeTruthy();
+    swipe(false);
+    expect(screen.getByLabelText("Page 1 of 2")).toBeTruthy();
+    expect(usePhotoboothStore.getState().currentStep).toBe(AppStep.StripStyle);
+  });
   it("returns from customization to the result with all original photos and edits intact", () => {
     const photos = Array.from({ length: 3 }, (_, i) => ({
       dataUrl: `photo-${i}`,

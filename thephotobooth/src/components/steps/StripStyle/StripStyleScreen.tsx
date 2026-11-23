@@ -1,5 +1,6 @@
 import { useTranslation } from "../../../i18n/useLanguage";
 import { useState } from "react";
+import { useSwipePagination } from "../../../hooks/useSwipePagination";
 import { usePhotoboothStore } from "../../../store/usePhotoboothStore";
 import { PATTERN_OPTIONS, SOLID_OPTIONS } from "../../../utils/constants";
 import { CustomPatternPicker } from "./CustomPatternPicker";
@@ -65,6 +66,7 @@ export function StripStyleScreen() {
       [category]: Math.max(0, Math.min(totalPages - 1, page + direction)),
     }));
   };
+  const swipePages = useSwipePagination(changePage);
   return (
     <section className="screen style-screen">
       <header className="screen-heading">
@@ -93,7 +95,8 @@ export function StripStyleScreen() {
       ) : (
         <>
           <div
-            className="style-grid"
+            className="style-grid swipe-pages"
+            {...swipePages}
             id="style-options"
             role="group"
             aria-label={t("{category} options", {
@@ -130,7 +133,7 @@ export function StripStyleScreen() {
             })}
           </div>
           {totalPages > 1 && (
-            <nav className="style-pagination" aria-label={t("Style pages")}>
+            <nav className="style-pagination swipe-pages" aria-label={t("Style pages")} {...swipePages}>
               <button
                 type="button"
                 className="page-arrow"

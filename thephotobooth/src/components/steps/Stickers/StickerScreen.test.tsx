@@ -62,6 +62,28 @@ afterEach(() => {
 });
 
 describe("sticker editor", () => {
+  it("swipes the sticker catalog without placing a sticker or navigating away", () => {
+    const { container } = render(<StickerScreen />);
+    const palette = container.querySelector(".sticker-palette")!;
+    const swipe = (left = true) => {
+      const start = { identifier: 1, clientX: left ? 240 : 70, clientY: 100 };
+      const end = { ...start, clientX: left ? 70 : 240 };
+      fireEvent.touchStart(palette, { touches: [start] });
+      fireEvent.touchMove(palette, { touches: [end] });
+      fireEvent.touchEnd(palette, { touches: [], changedTouches: [end] });
+    };
+    swipe(false);
+    expect(screen.getByRole("button", { name: "Add Heart" })).toBeTruthy();
+    swipe();
+    expect(screen.queryByRole("button", { name: "Add Heart" })).toBeNull();
+    fireEvent.click(palette.querySelector("button")!);
+    expect(usePhotoboothStore.getState().stickers).toHaveLength(0);
+    for (let i = 0; i < 8; i++) swipe();
+    expect((screen.getByRole("button", { name: "Next stickers page" }) as HTMLButtonElement).disabled).toBe(true);
+    for (let i = 0; i < 8; i++) swipe(false);
+    expect(screen.getByRole("button", { name: "Add Heart" })).toBeTruthy();
+    expect(usePhotoboothStore.getState().currentStep).toBe(AppStep.Stickers);
+  });
   it("shows the size and duplicates the selected sticker with independent transforms", async () => {
     render(<StickerScreen />);
     fireEvent.click(screen.getByRole("button", { name: "Add Phone" }));

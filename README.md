@@ -7,9 +7,10 @@ Fotocabina web con estética retro: toma fotos, crea una tira personalizada y de
 ## Funciones
 
 - Captura automática de **1 a 4 fotos**, con cuenta regresiva. Las tiras de 1 a 3 fotos son verticales; 4 fotos usan una cuadrícula de 2 × 2.
-- **27 patrones en WebP sin pérdida y 20 colores sólidos**, con paginación, además de la opción de usar una imagen de la galería como patrón.
+- **27 patrones en WebP sin pérdida y 20 colores sólidos**, con paginación mediante flechas o deslizamiento horizontal en pantallas táctiles, además de la opción de usar una imagen de la galería como patrón.
 - **10 filtros**: Normal, 2016, Sepia, B&W, Vintage, Cool, Sepia Film, Rose Pop, Pink Ink y Blue Moon. Se pueden cambiar después de tomar las fotos.
 - **70 stickers en WebP sin pérdida**, incluidos el abecedario completo de A a Z, seguido de `&` y `!`.
+- El catálogo de stickers también permite cambiar de página deslizando a izquierda o derecha en pantallas táctiles.
 - Editor de stickers con arrastre, tamaño en porcentaje, rotación, volteo, duplicado y borrado. En pantallas táctiles también admite dos dedos para ajustar tamaño y rotación.
 - Selección de cámara frontal o trasera. La opción trasera solo aparece cuando el navegador identifica una disponible.
 - Vista ampliada de la tira, descarga PNG y opciones de guardado o compartición según el dispositivo.
